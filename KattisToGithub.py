@@ -4,6 +4,7 @@ from typing import List, Dict
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
 from src.argument_parser import parse_arguments
+from src.solved_problem import SolvedProblem
 
 
 class KattisToGithub:
@@ -11,6 +12,7 @@ class KattisToGithub:
         self.session = requests.Session()
         self.base_url = BASE_URL
         self.login_url = LOGIN_URL
+        self._problems: List[SolvedProblem]
 
     def get_login_details_from_sys_argv(self) -> None:
         """
@@ -72,10 +74,17 @@ class KattisToGithub:
         soup = Soup(response.text, 'html.parser')
         for tr in soup.find_all('tr'):
             if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
-                #if 'difficulty_number' in tr.attrs['class']:
-                    #print(tr.contents[0], tr.contents[4].find('span'))
-                #print(tr.contents[4].find('span').attrs['class'])
-                print(tr)
+                self._parse_solved_problem(tr)
+                break
+
+    def _parse_solved_problem(self, html):
+        sp = SolvedProblem(
+            link = html.contents[0].find('a')['href'],
+            name = html.contents[0].text,
+            points = html.contents[4].find('span').text,
+            difficulty = html.contents[4].find('span').attrs['class'][-1].split('_')[1].capitalize()
+        )
+        print(sp)
 
 
 if __name__ == '__main__':
