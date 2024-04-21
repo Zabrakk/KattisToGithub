@@ -12,7 +12,7 @@ class KattisToGithub:
         self.session = requests.Session()
         self.base_url = BASE_URL
         self.login_url = LOGIN_URL
-        self.problems: List[SolvedProblem]
+        self.problems: List[SolvedProblem] = []
 
     def get_run_details_from_sys_argv(self) -> None:
         """
@@ -70,22 +70,29 @@ class KattisToGithub:
             return True
 
     def get_solved_problems(self) -> None:
-        # TODO
         response = self.session.get(self._solved_problems_url)
         soup = Soup(response.text, 'html.parser')
-        for tr in soup.find_all('tr'):
-            if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
-                self._parse_solved_problem(tr)
-                break
+        pages = [''] + [href.attrs['href'] for href in soup.find_all('a', href=True) if '?page=' in href.attrs['href']]
+        for page in pages:
+            response = self.session.get(self._solved_problems_url + page)
+            soup = Soup(response.text, 'html.parser')
+            for tr in soup.find_all('tr'):
+                if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
+                    self.problems += [self._parse_solved_problem(tr)]
+            for next_page in [href.attrs['href'] for href in soup.find_all('a', href=True) if '?page=' in href.attrs['href']]:
+                if next_page not in pages and next_page != '?page=1':
+                    pages += [next_page]
+        print(len(self.problems))
+        print(self.problems[0])
+
 
     def _parse_solved_problem(self, html):
-        sp = SolvedProblem(
+        return SolvedProblem(
             link = html.contents[0].find('a')['href'],
             name = html.contents[0].text,
             points = html.contents[4].find('span').text,
             difficulty = html.contents[4].find('span').attrs['class'][-1].split('_')[1].capitalize()
         )
-        print(sp)
 
 
 if __name__ == '__main__':
