@@ -22,7 +22,7 @@ class TestKattisToGithub(TestCase):
         self.csrf_token_mock = mock.patch('KattisToGithub.KattisToGithub._get_CSRF_token', return_value=CSRF_TOKEN)
         self.csrf_token_mock.start()
         self.KTG = KattisToGithub()
-        self.KTG.get_login_details_from_sys_argv()
+        self.KTG.get_run_details_from_sys_argv()
         return super().setUp()
 
     def tearDown(self) -> None:
@@ -35,8 +35,8 @@ class TestKattisToGithub(TestCase):
         assert KTG.base_url == BASE_URL
         assert KTG.login_url == LOGIN_URL
 
-    def test_get_login_details_from_sys_argv(self):
-        self.KTG.get_login_details_from_sys_argv()
+    def test_get_run_details_from_sys_argv(self):
+        self.KTG.get_run_details_from_sys_argv()
         assert self.KTG.user == USER
         assert self.KTG.password == PASSWORD
 
