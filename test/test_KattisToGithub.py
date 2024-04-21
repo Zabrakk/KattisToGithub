@@ -6,6 +6,7 @@ from KattisToGithub import KattisToGithub
 CSRF_TOKEN = '12345'
 USER = 'my_username'
 PASSWORD = 'my_password'
+DIRECTORY = 'tests'
 
 
 class MockPost:
@@ -17,7 +18,7 @@ class MockPost:
 
 class TestKattisToGithub(TestCase):
     def setUp(self) -> None:
-        mock.patch('sys.argv', ['', '-u', USER, '-p', PASSWORD]).start()
+        mock.patch('sys.argv', ['', '-u', USER, '-p', PASSWORD, '-d', DIRECTORY]).start()
         self.csrf_token_mock = mock.patch('KattisToGithub.KattisToGithub._get_CSRF_token', return_value=CSRF_TOKEN)
         self.csrf_token_mock.start()
         self.KTG = KattisToGithub()
