@@ -12,9 +12,9 @@ class KattisToGithub:
         self.session = requests.Session()
         self.base_url = BASE_URL
         self.login_url = LOGIN_URL
-        self._problems: List[SolvedProblem]
+        self.problems: List[SolvedProblem]
 
-    def get_login_details_from_sys_argv(self) -> None:
+    def get_run_details_from_sys_argv(self) -> None:
         """
         Uses src/argument_parser to extract the Kattis login details from command line input.
         Stores these values to self.user and self.password respectively.
@@ -22,6 +22,7 @@ class KattisToGithub:
         parser = parse_arguments(sys.argv[1:])
         self.user = parser.user
         self.password = parser.password
+        self.directory = parser.directory
 
     @property
     def login_payload(self) -> Dict:
@@ -89,6 +90,6 @@ class KattisToGithub:
 
 if __name__ == '__main__':
     KTG = KattisToGithub()
-    KTG.get_login_details_from_sys_argv()
-    KTG.login()
-    KTG.get_solved_problems()
+    KTG.get_run_details_from_sys_argv()
+    if KTG.login():
+        KTG.get_solved_problems()
