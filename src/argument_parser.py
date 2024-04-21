@@ -13,7 +13,7 @@ def parse_arguments(args: List[str]):
     - List[str]: [user, password, directory]
     """
     parser = ArgumentParser()
-    parser.add_argument('-u', '--user', type=str, help='Kattis username or email')
-    parser.add_argument('-p', '--password', type=str, help='Kattis password')
-    parser.add_argument('-d', '--directory', type=str, help='Directory to which Kattis solution are downloaded to')
+    parser.add_argument('-u', '--user', type=str, required=True, help='Kattis username or email')
+    parser.add_argument('-p', '--password', type=str, required=True, help='Kattis password')
+    parser.add_argument('-d', '--directory', type=str, required=True, help='Directory to which Kattis solution are downloaded to')
     return parser.parse_args(args)
