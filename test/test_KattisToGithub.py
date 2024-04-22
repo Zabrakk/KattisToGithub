@@ -16,6 +16,18 @@ class MockPost:
     url = BASE_URL
 
 
+class MockSoup:
+    def __init__(self) -> None:
+        pass
+
+    class NextPageHref:
+        def __init__(self, page_num: int) -> None:
+            self.attrs = {'href': f'?page={page_num}'}
+
+    def find_all(*args, **kwargs):
+        return [MockSoup.NextPageHref(page_num=i) for i in range(1, 4)]
+
+
 class TestKattisToGithub(TestCase):
     def setUp(self) -> None:
         mock.patch('sys.argv', ['', '-u', USER, '-p', PASSWORD, '-d', DIRECTORY]).start()
@@ -39,6 +51,7 @@ class TestKattisToGithub(TestCase):
         self.KTG.get_run_details_from_sys_argv()
         assert self.KTG.user == USER
         assert self.KTG.password == PASSWORD
+        assert self.KTG.directory == DIRECTORY
 
     def test_get_CSRF_token(self):
         self.csrf_token_mock.stop()
@@ -65,3 +78,11 @@ class TestKattisToGithub(TestCase):
     def test_get_solved_problems(self):
         # TODO
         assert False
+
+    def test_get_links_to_next_pages(self):
+        pages = []
+        self.KTG._get_links_to_next_pages(MockSoup(), pages=pages)
+        assert pages == ['?page=2', '?page=3']
+        # Check that duplicates are not added
+        self.KTG._get_links_to_next_pages(MockSoup(), pages=pages)
+        assert pages == ['?page=2', '?page=3']
