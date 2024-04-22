@@ -1,7 +1,9 @@
 import requests
+from typing import List
 from unittest import TestCase, mock
 from src.constants import *
 from KattisToGithub import KattisToGithub
+from src.solved_problem import SolvedProblem
 
 CSRF_TOKEN = '12345'
 USER = 'my_username'
@@ -17,15 +19,29 @@ class MockPost:
 
 
 class MockSoup:
-    def __init__(self) -> None:
-        pass
-
     class NextPageHref:
         def __init__(self, page_num: int) -> None:
             self.attrs = {'href': f'?page={page_num}'}
 
-    def find_all(*args, **kwargs):
+    class SolvedProblemTr:
+        def __init__(self, text='ProblemName') -> None:
+            self.text = text
+            self.attrs = {'class': ['',0,0,'difficulty_medium']}
+
+        def find(self, arg):
+            if arg == 'a':
+                return {'href': 'CorrectLink'}
+            elif arg == 'span':
+                self.text = '3.0'
+                return self
+
+    @property
+    def contents(self) -> List:
+        return [MockSoup.SolvedProblemTr(), None, None, None, MockSoup.SolvedProblemTr()]
+
+    def find_all(*args, **kwargs) -> List:
         return [MockSoup.NextPageHref(page_num=i) for i in range(1, 4)]
+
 
 
 class TestKattisToGithub(TestCase):
@@ -86,3 +102,10 @@ class TestKattisToGithub(TestCase):
         # Check that duplicates are not added
         self.KTG._get_links_to_next_pages(MockSoup(), pages=pages)
         assert pages == ['?page=2', '?page=3']
+
+    def test_parse_solved_problem(self):
+        sp = self.KTG._parse_solved_problem(MockSoup())
+        assert sp.link == 'CorrectLink'
+        assert sp.name == 'ProblemName'
+        assert sp.points == '3.0'
+        assert sp.difficulty == 'Medium'
