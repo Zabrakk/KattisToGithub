@@ -50,7 +50,6 @@ class KattisToGithub:
         soup = Soup(response.text, 'html.parser')
         return soup.find('input', {'name': 'csrf_token'}).get('value')
 
-
     def login(self) -> bool:
         """
         Logs into Kattis with the given credentials.
@@ -90,7 +89,7 @@ class KattisToGithub:
 
         Parameters:
         - html: BeautifulSoup object created from a HTTP request response.
-        - pages: List of query params leading to further pages. The lists contents is updated inside this function
+        - pages: List of query params leading to further pages. The lists contents is updated inside this function.
 
         Returns:
         - List[str]: Updated list of query strings without duplicates or the page number 1.
@@ -101,7 +100,16 @@ class KattisToGithub:
                 pages += [next_page]
 
 
-    def _parse_solved_problem(self, html):
+    def _parse_solved_problem(self, html) -> SolvedProblem:
+        """
+        Creates a SolvedProblem object based on given data
+
+        Parameters:
+        - html: BeautifulSoup object created from a HTTP request response.
+
+        Returns:
+        - SolvedProblem
+        """
         return SolvedProblem(
             link = html.contents[0].find('a')['href'],
             name = html.contents[0].text,
