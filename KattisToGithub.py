@@ -12,7 +12,7 @@ class KattisToGithub:
         self.session = requests.Session()
         self.base_url = BASE_URL
         self.login_url = LOGIN_URL
-        self.problems: List[SolvedProblem] = []
+        self.solved_problems: List[SolvedProblem] = []
 
     def get_run_details_from_sys_argv(self) -> None:
         """
@@ -57,6 +57,7 @@ class KattisToGithub:
         Returns:
         - bool: True if successfully logged in; False otherwise
         """
+        print('#: Attempting to login')
         response = self.session.post(self.login_url, data=self.login_payload, timeout=30)
         if response.status_code != 200:
             print('#: Something went wrong during login')
@@ -74,14 +75,14 @@ class KattisToGithub:
         pages = ['']
         self._get_links_to_next_pages(soup, pages)
         for page in pages:
+            print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
             response = self.session.get(self._solved_problems_url + page)
             soup = Soup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
-                    self.problems += [self._parse_solved_problem(tr)]
+                    self.solved_problems += [self._parse_solved_problem(tr)]
             self._get_links_to_next_pages(soup, pages)
-        print(len(self.problems))
-        print(self.problems[0])
+        print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
     def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> List[str]:
         """
