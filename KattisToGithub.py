@@ -125,7 +125,16 @@ class KattisToGithub:
     def get_codes_for_solved_problems(self):
         print('#: Starting to fetch codes for solved problems')
         for solved_problem in self.solved_problems:
-            print(solved_problem)
+            print(solved_problem.link)
+            response = self.session.get(solved_problem.link)
+            soup = Soup(response.text, 'html.parser')
+            # Obtain links to submissions
+            for tr in soup.find_all('tr'):
+                if 'data-submission-id' in tr.attrs:
+                    link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
+                    response = self.session.get(link)
+                    soup2 = Soup(response.text, 'html.parser')
+                    print(soup2.contents)
             break
 
 
