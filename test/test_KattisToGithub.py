@@ -1,9 +1,7 @@
-import requests
 from typing import List
 from unittest import TestCase, mock
 from src.constants import *
 from KattisToGithub import KattisToGithub
-from src.solved_problem import SolvedProblem
 
 CSRF_TOKEN = '12345'
 USER = 'my_username'
@@ -26,7 +24,7 @@ class MockSoup:
     class SolvedProblemTr:
         def __init__(self, text='ProblemName') -> None:
             self.text = text
-            self.attrs = {'class': ['',0,0,'difficulty_medium']}
+            self.attrs = {'class': ['', 0, 0, 'difficulty_medium']}
 
         def find(self, arg):
             if arg == 'a':
