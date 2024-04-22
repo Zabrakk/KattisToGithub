@@ -1,5 +1,6 @@
 import sys
 import requests
+from functools import cached_property
 from typing import List, Dict
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
@@ -32,9 +33,13 @@ class KattisToGithub:
             'password': self.password
         }
 
-    @property
+    @cached_property
     def _solved_problems_url(self) -> str:
         return f'{self.base_url}/users/{self.user}'
+
+    @cached_property
+    def _solved_problem_submission_url(self) -> str:
+        return f'{self._solved_problems_url}?tab=submissions&problem='
 
     def _get_CSRF_token(self) -> str:
         """
@@ -100,7 +105,6 @@ class KattisToGithub:
             if next_page not in pages and next_page != '?page=1':
                 pages += [next_page]
 
-
     def _parse_solved_problem(self, html) -> SolvedProblem:
         """
         Creates a SolvedProblem object based on given data
@@ -112,11 +116,17 @@ class KattisToGithub:
         - SolvedProblem
         """
         return SolvedProblem(
-            link = html.contents[0].find('a')['href'],
+            link = self._solved_problem_submission_url + html.contents[0].find('a')['href'].replace('/problems/', ''),
             name = html.contents[0].text,
             points = html.contents[4].find('span').text,
             difficulty = html.contents[4].find('span').attrs['class'][-1].split('_')[1].capitalize()
         )
+
+    def get_codes_for_solved_problems(self):
+        print('#: Starting to fetch codes for solved problems')
+        for solved_problem in self.solved_problems:
+            print(solved_problem)
+            break
 
 
 if __name__ == '__main__':
@@ -124,3 +134,4 @@ if __name__ == '__main__':
     KTG.get_run_details_from_sys_argv()
     if KTG.login():
         KTG.get_solved_problems()
+        KTG.get_codes_for_solved_problems()

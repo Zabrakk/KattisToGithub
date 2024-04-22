@@ -28,7 +28,7 @@ class MockSoup:
 
         def find(self, arg):
             if arg == 'a':
-                return {'href': 'CorrectLink'}
+                return {'href': '/problems/CorrectLink'}
             elif arg == 'span':
                 self.text = '3.0'
                 return self
@@ -103,7 +103,7 @@ class TestKattisToGithub(TestCase):
 
     def test_parse_solved_problem(self):
         sp = self.KTG._parse_solved_problem(MockSoup())
-        assert sp.link == 'CorrectLink'
+        assert sp.link == f'https://open.kattis.com/users/{USER}?tab=submissions&problem=CorrectLink'
         assert sp.name == 'ProblemName'
         assert sp.points == '3.0'
         assert sp.difficulty == 'Medium'
