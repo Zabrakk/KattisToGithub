@@ -72,18 +72,33 @@ class KattisToGithub:
     def get_solved_problems(self) -> None:
         response = self.session.get(self._solved_problems_url)
         soup = Soup(response.text, 'html.parser')
-        pages = [''] + [href.attrs['href'] for href in soup.find_all('a', href=True) if '?page=' in href.attrs['href']]
+        pages = ['']
+        self._get_links_to_next_pages(soup, pages)
         for page in pages:
             response = self.session.get(self._solved_problems_url + page)
             soup = Soup(response.text, 'html.parser')
             for tr in soup.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
                     self.problems += [self._parse_solved_problem(tr)]
-            for next_page in [href.attrs['href'] for href in soup.find_all('a', href=True) if '?page=' in href.attrs['href']]:
-                if next_page not in pages and next_page != '?page=1':
-                    pages += [next_page]
+            self._get_links_to_next_pages(soup, pages)
         print(len(self.problems))
         print(self.problems[0])
+
+    def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> List[str]:
+        """
+        Looks for the numbered next page buttons and obtains the query strings from them.
+
+        Parameters:
+        - html: BeautifulSoup object created from a HTTP request response.
+        - pages: List of query params leading to further pages. The lists contents is updated inside this function
+
+        Returns:
+        - List[str]: Updated list of query strings without duplicates or the page number 1.
+        """
+        next_pages = [href.attrs['href'] for href in html.find_all('a', href=True) if '?page=' in href.attrs['href']]
+        for next_page in next_pages:
+            if next_page not in pages and next_page != '?page=1':
+                pages += [next_page]
 
 
     def _parse_solved_problem(self, html):
