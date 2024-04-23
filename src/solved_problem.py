@@ -8,7 +8,7 @@ class SolvedProblem:
     name: str = None
     points: str = None
     difficulty: str = None
-    code: str = None
+    code = []
 
     def __repr__(self) -> str:
         return f'''
