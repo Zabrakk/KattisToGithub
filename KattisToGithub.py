@@ -124,18 +124,27 @@ class KattisToGithub:
 
     def get_codes_for_solved_problems(self):
         print('#: Starting to fetch codes for solved problems')
+        i = 0
         for solved_problem in self.solved_problems:
             print(solved_problem.link)
             response = self.session.get(solved_problem.link)
             soup = Soup(response.text, 'html.parser')
             # Obtain links to submissions
-            for tr in soup.find_all('tr'):
-                if 'data-submission-id' in tr.attrs:
+            for tr in soup.find_all(lambda tag: 'data-submission-id' in tag.attrs):
+                if tr.find('div', {'class': 'status is-status-accepted'}):
                     link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
                     response = self.session.get(link)
                     soup2 = Soup(response.text, 'html.parser')
-                    print(soup2.contents)
-            break
+                    print(link)
+                    if soup2.find('td', {'data-type': 'lang'}).text == 'Python 3':
+                        code = soup2.find(name='div', attrs={'class': 'source-highlight w-full'}).text
+                        if 'def main():' in code:
+                            solved_problem.code = code
+                            print(solved_problem)
+                            break
+            i += 1
+            if i > 10:
+                break
 
 
 if __name__ == '__main__':
