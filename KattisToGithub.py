@@ -147,6 +147,7 @@ class KattisToGithub:
                     submission_html = Soup(response.text, 'html.parser')
                     print(link)
                     if submission_html.find('td', {'data-type': 'lang'}).text == 'Python 3':
+                        solved_problem.file_name = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
                         code = submission_html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
                         if 'def main():' in code:
                             solved_problem.code += [code]
