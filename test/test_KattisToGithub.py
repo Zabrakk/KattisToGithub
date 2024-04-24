@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import List
 from unittest import TestCase, mock
 from src.constants import *
@@ -6,7 +8,7 @@ from KattisToGithub import KattisToGithub
 CSRF_TOKEN = '12345'
 USER = 'my_username'
 PASSWORD = 'my_password'
-DIRECTORY = 'tests'
+DIRECTORY = 'test'
 
 
 class MockPost:
@@ -65,7 +67,16 @@ class TestKattisToGithub(TestCase):
         self.KTG.get_run_details_from_sys_argv()
         assert self.KTG.user == USER
         assert self.KTG.password == PASSWORD
-        assert self.KTG.directory == DIRECTORY
+        assert self.KTG.directory == Path(__file__).parent
+
+    def test_create_folders_for_different_difficulties(self):
+        self.KTG.create_folders_for_different_difficulties()
+        assert os.path.exists('test/Easy')
+        assert os.path.exists('test/Medium')
+        assert os.path.exists('test/Hard')
+        os.rmdir('test/Easy')
+        os.rmdir('test/Medium')
+        os.rmdir('test/Hard')
 
     def test_get_CSRF_token(self):
         self.csrf_token_mock.stop()

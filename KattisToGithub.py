@@ -1,4 +1,6 @@
+import os
 import sys
+from pathlib import Path
 import requests
 from functools import cached_property
 from typing import List, Dict
@@ -23,7 +25,16 @@ class KattisToGithub:
         parser = parse_arguments(sys.argv[1:])
         self.user = parser.user
         self.password = parser.password
-        self.directory = parser.directory
+        self.directory = Path(__file__).parent / parser.directory
+
+    def create_folders_for_different_difficulties(self) -> None:
+        """
+        Creates a folder for each of the different problem difficulties if they don't already exist
+        """
+        for difficulty in ['Easy', 'Medium', 'Hard']:
+            if not os.path.exists(self.directory / difficulty):
+                print(f'#: Creating folder for {difficulty} problem solutions')
+                os.mkdir(self.directory / difficulty)
 
     @property
     def login_payload(self) -> Dict:
@@ -149,6 +160,7 @@ class KattisToGithub:
 if __name__ == '__main__':
     KTG = KattisToGithub()
     KTG.get_run_details_from_sys_argv()
+    KTG.create_folders_for_different_difficulties()
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
