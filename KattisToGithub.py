@@ -87,17 +87,17 @@ class KattisToGithub:
 
     def get_solved_problems(self) -> None:
         response = self.session.get(self._solved_problems_url)
-        soup = Soup(response.text, 'html.parser')
+        html = Soup(response.text, 'html.parser')
         pages = ['']
-        self._get_links_to_next_pages(soup, pages)
+        self._get_links_to_next_pages(html, pages)
         for page in pages:
             print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
             response = self.session.get(self._solved_problems_url + page)
-            soup = Soup(response.text, 'html.parser')
-            for tr in soup.find_all('tr'):
+            html = Soup(response.text, 'html.parser')
+            for tr in html.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
                     self.solved_problems += [self._parse_solved_problem(tr)]
-            self._get_links_to_next_pages(soup, pages)
+            self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
     def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> List[str]:
