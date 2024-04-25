@@ -152,9 +152,10 @@ class KattisToGithub:
                         if 'def main():' in code:
                             solved_problem.code += [code]
                             print(solved_problem)
+                            solved_problem.write_to_file(self.directory)
                             break
             i += 1
-            if i > 10:
+            if i > 3:
                 break
 
 
