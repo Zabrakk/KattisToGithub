@@ -1,5 +1,6 @@
 import os
 import sys
+import csv
 from pathlib import Path
 import requests
 from functools import cached_property
@@ -7,7 +8,7 @@ from typing import List, Dict
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
 from src.argument_parser import parse_arguments
-from src.solved_problem import SolvedProblem
+from src.solved_problem import SolvedProblem, ProblemStatus
 
 
 class KattisToGithub:
@@ -133,7 +134,7 @@ class KattisToGithub:
             difficulty = html.contents[4].find('span').attrs['class'][-1].split('_')[1].capitalize()
         )
 
-    def get_codes_for_solved_problems(self):
+    def get_codes_for_solved_problems(self) -> None:
         print('#: Starting to fetch codes for solved problems')
         i = 0
         for solved_problem in self.solved_problems:
@@ -147,16 +148,28 @@ class KattisToGithub:
                     submission_html = Soup(response.text, 'html.parser')
                     print(link)
                     if submission_html.find('td', {'data-type': 'lang'}).text == 'Python 3':
-                        solved_problem.file_name = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
+                        filename = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
                         code = submission_html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
                         if 'def main():' in code:
-                            solved_problem.code += [code]
+                            solved_problem.filename_code_dict[filename] = code
+                            solved_problem.status = ProblemStatus.CODE_FOUND
                             print(solved_problem)
                             solved_problem.write_to_file(self.directory)
                             break
+                        else:
+                            solved_problem.status = ProblemStatus.CODE_NOT_FOUND
             i += 1
             if i > 3:
                 break
+
+    def update_status_to_csv(self) -> None:
+        # if os.path.exists(self.directory / 'status.csv'):
+            # Read status from the file
+        with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=['Name', 'Difficulty', 'Status'])
+            writer.writeheader()
+            for solved_problem in self.solved_problems:
+                writer.writerow(solved_problem.to_dict())
 
 
 if __name__ == '__main__':
@@ -166,3 +179,4 @@ if __name__ == '__main__':
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
+        KTG.update_status_to_csv()
