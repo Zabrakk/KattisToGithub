@@ -37,6 +37,21 @@ class KattisToGithub:
                 print(f'#: Creating folder for {difficulty} problem solutions')
                 os.mkdir(self.directory / difficulty)
 
+    def load_solved_problem_status_csv(self) -> None:
+        if os.path.exists(self.directory / 'status.csv'):
+            with open(self.directory / 'status.csv', 'r') as csv_file:
+                reader = csv.DictReader(csv_file, fieldnames=['Name', 'Difficulty', 'Status'])
+                reader.__next__()
+                for row in reader:
+                    self.solved_problems += [self._load_solved_problem_from_csv_row(row)]
+
+    def _load_solved_problem_from_csv_row(self, row: Dict) -> SolvedProblem:
+        return SolvedProblem(
+            name=row['Name'],
+            difficulty=row['Difficulty'],
+            status=ProblemStatus(int(row['Status']))
+        )
+
     @property
     def login_payload(self) -> Dict:
         return {
@@ -97,7 +112,12 @@ class KattisToGithub:
             html = Soup(response.text, 'html.parser')
             for tr in html.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
-                    self.solved_problems += [self._parse_solved_problem(tr)]
+                    sp = self._parse_solved_problem(tr)
+                    if sp.name not in [problem.name for problem in self.solved_problems]:
+                        self.solved_problems += [sp]
+                    else:
+                        existing_entry = [problem for problem in self.solved_problems if problem.name == sp.name][0]
+                        existing_entry.link = sp.link
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
@@ -138,6 +158,9 @@ class KattisToGithub:
         print('#: Starting to fetch codes for solved problems')
         i = 0
         for solved_problem in self.solved_problems:
+            if solved_problem.status == 1:
+                print(f'#: Not updating solution for {solved_problem.name}')
+                continue
             response = self.session.get(solved_problem.link)
             solved_problem_html = Soup(response.text, 'html.parser')
             # Obtain links to submissions
@@ -163,8 +186,6 @@ class KattisToGithub:
                 break
 
     def update_status_to_csv(self) -> None:
-        # if os.path.exists(self.directory / 'status.csv'):
-            # Read status from the file
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=['Name', 'Difficulty', 'Status'])
             writer.writeheader()
@@ -176,6 +197,7 @@ if __name__ == '__main__':
     KTG = KattisToGithub()
     KTG.get_run_details_from_sys_argv()
     KTG.create_folders_for_different_difficulties()
+    KTG.load_solved_problem_status_csv()
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
