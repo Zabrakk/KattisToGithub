@@ -1,2 +1,2 @@
 #!/bin/sh
-python -m pytest test/
+python -m pytest test/ $1
