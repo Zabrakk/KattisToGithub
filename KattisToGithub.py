@@ -117,7 +117,6 @@ class KattisToGithub:
     def get_solved_problems(self) -> None:
         html = self._get_html(self._solved_problems_url)
         pages = ['']
-        self._get_links_to_next_pages(html, pages)
         for page in pages:
             print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
             html = self._get_html(self._solved_problems_url + page)
@@ -128,16 +127,13 @@ class KattisToGithub:
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
-    def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> List[str]:
+    def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> None:
         """
         Looks for the numbered next page buttons and obtains the query strings from them.
 
         Parameters:
         - html: BeautifulSoup object created from a HTTP request response.
         - pages: List of query params leading to further pages. The lists contents is updated inside this function.
-
-        Returns:
-        - List[str]: Updated list of query strings without duplicates or the page number 1.
         """
         next_pages = [href.attrs['href'] for href in html.find_all('a', href=True) if '?page=' in href.attrs['href']]
         for next_page in next_pages:
