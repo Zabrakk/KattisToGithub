@@ -121,11 +121,10 @@ class KattisToGithub:
         for page in pages:
             print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
             html = self._get_html(self._solved_problems_url + page)
-            for tr in html.find_all('tr'):
-                if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
-                    sp = self._parse_solved_problem(tr)
-                    if sp.link not in self._solved_problem_links:
-                        self.solved_problems += [sp]
+            for tr in html.find('div', attrs={'id': 'problems-tab'}).find('tbody').find_all('tr'):
+                sp = self._parse_solved_problem(tr)
+                if sp.link not in self._solved_problem_links:
+                    self.solved_problems += [sp]
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
