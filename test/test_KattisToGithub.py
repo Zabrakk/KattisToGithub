@@ -19,6 +19,17 @@ except:
     TEST_CREDENTIALS = None
 
 
+def use_test_credentials(func):
+    def wrapper(*args):
+        print(TEST_CREDENTIALS)
+        if len(TEST_CREDENTIALS) != 2:
+            raise unittest.SkipTest('test/test_credentials.txt is empty')
+        args[0].KTG.user = TEST_CREDENTIALS[0]
+        args[0].KTG.password = TEST_CREDENTIALS[1]
+        return func(*args)
+    return wrapper
+
+
 class MockPost:
     def __init__(self, *args, **kwargs) -> None:
         pass
@@ -55,8 +66,6 @@ class MockSoup:
 class TestKattisToGithub(TestCase):
     def setUp(self) -> None:
         mock.patch('sys.argv', ['', '-u', USER, '-p', PASSWORD, '-d', DIRECTORY]).start()
-        self.csrf_token_mock = mock.patch('KattisToGithub.KattisToGithub._get_CSRF_token', return_value=CSRF_TOKEN)
-        self.csrf_token_mock.start()
         self.KTG = KattisToGithub()
         self.KTG.get_run_details_from_sys_argv()
         return super().setUp()
@@ -111,16 +120,16 @@ class TestKattisToGithub(TestCase):
         assert self.KTG.solved_problems == []
 
     def test_get_CSRF_token(self):
-        self.csrf_token_mock.stop()
         token = self.KTG._get_CSRF_token()
         assert token.isnumeric()
 
     def test_login_payload_property(self):
-        assert self.KTG.login_payload == {
-            'csrf_token': CSRF_TOKEN,
-            'user': USER,
-            'password': PASSWORD
-        }
+        with  mock.patch('KattisToGithub.KattisToGithub._get_CSRF_token', return_value=CSRF_TOKEN):
+            assert self.KTG.login_payload == {
+                'csrf_token': CSRF_TOKEN,
+                'user': USER,
+                'password': PASSWORD
+            }
 
     def test_solved_problems_url_property(self):
         assert self.KTG._solved_problems_url == f'{BASE_URL}/users/{USER}'
@@ -128,9 +137,9 @@ class TestKattisToGithub(TestCase):
     def test_login_fail(self):
         assert not self.KTG.login()
 
+    @use_test_credentials
     def test_login_success(self):
-        with mock.patch('requests.sessions.Session.post', MockPost):
-            assert self.KTG.login()
+        assert self.KTG.login()
 
     @unittest.skip(reason='TODO')
     def test_get_solved_problems(self):
