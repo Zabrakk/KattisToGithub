@@ -141,9 +141,15 @@ class TestKattisToGithub(TestCase):
         assert self.KTG.login()
 
     @unittest.skip(reason='TODO')
+    def test_get_solved_problems_mocked(self):
+        with mock.patch('KattisToGithub.KattisToGithub._get_html', return_value=None):
+            pass
+
+    @use_test_credentials
     def test_get_solved_problems(self):
-        # TODO
-        assert False
+        self.KTG.login()
+        assert self.KTG.get_solved_problems() is None
+        assert len(self.KTG.solved_problems) > 0
 
     def test_get_links_to_next_pages(self):
         pages = []
