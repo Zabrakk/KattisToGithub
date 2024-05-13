@@ -41,10 +41,13 @@ class KattisToGithub:
     def load_solved_problem_status_csv(self) -> None:
         if os.path.exists(self.directory / 'status.csv'):
             with open(self.directory / 'status.csv', 'r') as csv_file:
-                reader = csv.DictReader(csv_file, fieldnames=CSV_FIELD_NAMES)
-                reader.__next__()
-                for row in reader:
-                    self.solved_problems += [self._load_solved_problem_from_csv_row(row)]
+                try:
+                    reader = csv.DictReader(csv_file, fieldnames=CSV_FIELD_NAMES)
+                    reader.__next__()
+                    for row in reader:
+                        self.solved_problems += [self._load_solved_problem_from_csv_row(row)]
+                except StopIteration:
+                    print(f'#: Status.csv was empty')
 
     def _load_solved_problem_from_csv_row(self, row: Dict) -> SolvedProblem:
         return SolvedProblem(
@@ -123,9 +126,6 @@ class KattisToGithub:
                     sp = self._parse_solved_problem(tr)
                     if sp.name not in self._solved_problem_names:
                         self.solved_problems += [sp]
-                    else:
-                        existing_entry = [problem for problem in self.solved_problems if problem.name == sp.name][0]
-                        existing_entry.link = sp.link
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
 
