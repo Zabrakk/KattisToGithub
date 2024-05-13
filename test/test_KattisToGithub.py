@@ -104,6 +104,11 @@ class TestKattisToGithub(TestCase):
         assert sp.difficulty == 'Easy'
         assert sp.status == 1
         assert sp.link == 'test-link'
+        os.remove('test/status.csv')
+
+    def test_load_solved_problem_status_csv_no_status_csv(self):
+        self.KTG.load_solved_problem_status_csv()
+        assert self.KTG.solved_problems == []
 
     def test_get_CSRF_token(self):
         self.csrf_token_mock.stop()
