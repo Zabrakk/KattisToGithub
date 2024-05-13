@@ -112,6 +112,12 @@ class TestKattisToGithub(TestCase):
         self.KTG.load_solved_problem_status_csv()
         assert self.KTG.solved_problems == []
 
+    def test_load_solved_problem_status_csv_empy_csv(self):
+        with open('test/status.csv', 'w', newline='') as _:
+            pass
+        assert self.KTG.load_solved_problem_status_csv() is None
+        os.remove('test/status.csv')
+
     def test_get_CSRF_token(self):
         token = self.KTG._get_CSRF_token()
         assert token.isnumeric()
