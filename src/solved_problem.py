@@ -26,7 +26,7 @@ class SolvedProblem:
                 file.write(self.filename_code_dict[filename])
 
     def to_dict(self) -> Dict:
-        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value}
+        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value, 'Link': self.link}
 
     def __repr__(self) -> str:
         return \
