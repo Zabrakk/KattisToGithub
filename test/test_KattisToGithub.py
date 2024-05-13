@@ -1,6 +1,8 @@
 import os
+import csv
 from pathlib import Path
 from typing import List
+import unittest
 from unittest import TestCase, mock
 from src.constants import *
 from KattisToGithub import KattisToGithub
@@ -9,6 +11,12 @@ CSRF_TOKEN = '12345'
 USER = 'my_username'
 PASSWORD = 'my_password'
 DIRECTORY = 'test'
+
+try:
+    with open('test/test_credentials.txt', 'r') as f:
+        TEST_CREDENTIALS = list(map(str.strip, f.readlines()))
+except:
+    TEST_CREDENTIALS = None
 
 
 class MockPost:
@@ -84,6 +92,19 @@ class TestKattisToGithub(TestCase):
         os.rmdir('test/Medium')
         os.rmdir('test/Hard')
 
+    def test_load_solved_problem_status_csv(self):
+        with open('test/status.csv', 'w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
+            writer.writeheader()
+            writer.writerow({'Name': 'Test', 'Difficulty': 'Easy', 'Status': 1, 'Link': 'test-link'})
+        self.KTG.load_solved_problem_status_csv()
+        assert len(self.KTG.solved_problems) == 1
+        sp = self.KTG.solved_problems[0]
+        assert sp.name == 'Test'
+        assert sp.difficulty == 'Easy'
+        assert sp.status == 1
+        assert sp.link == 'test-link'
+
     def test_get_CSRF_token(self):
         self.csrf_token_mock.stop()
         token = self.KTG._get_CSRF_token()
@@ -106,6 +127,7 @@ class TestKattisToGithub(TestCase):
         with mock.patch('requests.sessions.Session.post', MockPost):
             assert self.KTG.login()
 
+    @unittest.skip(reason='TODO')
     def test_get_solved_problems(self):
         # TODO
         assert False
@@ -124,3 +146,8 @@ class TestKattisToGithub(TestCase):
         assert sp.name == 'ProblemName'
         assert sp.points == '3.0'
         assert sp.difficulty == 'Medium'
+
+    @unittest.skipIf(TEST_CREDENTIALS is None, reason='No test credentials given')
+    def test_fail(self):
+        print(TEST_CREDENTIALS)
+        assert True
