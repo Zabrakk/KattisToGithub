@@ -74,8 +74,8 @@ class KattisToGithub:
         return f'{self._solved_problems_url}?tab=submissions&problem='
 
     @cached_property
-    def _solved_problem_names(self) -> str:
-        return [problem.name for problem in self.solved_problems]
+    def _solved_problem_links(self) -> str:
+        return [problem.link for problem in self.solved_problems]
 
     def _get_CSRF_token(self) -> str:
         """
@@ -124,7 +124,7 @@ class KattisToGithub:
             for tr in html.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
                     sp = self._parse_solved_problem(tr)
-                    if sp.name not in self._solved_problem_names:
+                    if sp.link not in self._solved_problem_links:
                         self.solved_problems += [sp]
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
