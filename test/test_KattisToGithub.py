@@ -30,13 +30,6 @@ def use_test_credentials(func):
     return wrapper
 
 
-class MockPost:
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-    status_code = 200
-    url = BASE_URL
-
-
 class MockSoup:
     class NextPageHref:
         def __init__(self, page_num: int) -> None:
