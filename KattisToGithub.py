@@ -27,6 +27,7 @@ class KattisToGithub:
         self.user = parser.user
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
+        self.update = parser.update
 
     def create_folders_for_different_difficulties(self) -> None:
         """
@@ -40,7 +41,7 @@ class KattisToGithub:
     def load_solved_problem_status_csv(self) -> None:
         if os.path.exists(self.directory / 'status.csv'):
             with open(self.directory / 'status.csv', 'r') as csv_file:
-                reader = csv.DictReader(csv_file, fieldnames=['Name', 'Difficulty', 'Status'])
+                reader = csv.DictReader(csv_file, fieldnames=CSV_FIELD_NAMES)
                 reader.__next__()
                 for row in reader:
                     self.solved_problems += [self._load_solved_problem_from_csv_row(row)]
@@ -49,7 +50,8 @@ class KattisToGithub:
         return SolvedProblem(
             name=row['Name'],
             difficulty=row['Difficulty'],
-            status=ProblemStatus(int(row['Status']))
+            status=ProblemStatus(int(row['Status'])),
+            link=row['Link']
         )
 
     @property
@@ -67,6 +69,10 @@ class KattisToGithub:
     @cached_property
     def _solved_problem_submission_url(self) -> str:
         return f'{self._solved_problems_url}?tab=submissions&problem='
+
+    @cached_property
+    def _solved_problem_names(self) -> str:
+        return [problem.name for problem in self.solved_problems]
 
     def _get_CSRF_token(self) -> str:
         """
@@ -101,19 +107,21 @@ class KattisToGithub:
             print('#: Logged in to Kattis')
             return True
 
+    def _get_html(self, url: str) -> Soup:
+        response = self.session.get(url)
+        return Soup(response.text, 'html.parser')
+
     def get_solved_problems(self) -> None:
-        response = self.session.get(self._solved_problems_url)
-        html = Soup(response.text, 'html.parser')
+        html = self._get_html(self._solved_problems_url)
         pages = ['']
         self._get_links_to_next_pages(html, pages)
         for page in pages:
             print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
-            response = self.session.get(self._solved_problems_url + page)
-            html = Soup(response.text, 'html.parser')
+            html = self._get_html(self._solved_problems_url + page)
             for tr in html.find_all('tr'):
                 if len(tr.contents) == 6 and 'difficulty_number' in tr.contents[4].find('span').attrs['class']:
                     sp = self._parse_solved_problem(tr)
-                    if sp.name not in [problem.name for problem in self.solved_problems]:
+                    if sp.name not in self._solved_problem_names:
                         self.solved_problems += [sp]
                     else:
                         existing_entry = [problem for problem in self.solved_problems if problem.name == sp.name][0]
@@ -158,17 +166,18 @@ class KattisToGithub:
         print('#: Starting to fetch codes for solved problems')
         i = 0
         for solved_problem in self.solved_problems:
+            if self.update and solved_problem.status != ProblemStatus.UPDATE:
+                print(f'#: Skipping {solved_problem.name}, status != UPDATE')
+                continue
             if solved_problem.status == 1:
                 print(f'#: Not updating solution for {solved_problem.name}')
                 continue
-            response = self.session.get(solved_problem.link)
-            solved_problem_html = Soup(response.text, 'html.parser')
+            solved_problem_html = self._get_html(solved_problem.link)
             # Obtain links to submissions
             for tag in solved_problem_html.find_all(lambda tag: 'data-submission-id' in tag.attrs):
                 if tag.find('div', {'class': 'status is-status-accepted'}):
                     link = self.base_url + tag.contents[-1].find('a', href=True).attrs['href']
-                    response = self.session.get(link)
-                    submission_html = Soup(response.text, 'html.parser')
+                    submission_html = self._get_html(link)
                     print(link)
                     if submission_html.find('td', {'data-type': 'lang'}).text == 'Python 3':
                         filename = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
@@ -187,7 +196,7 @@ class KattisToGithub:
 
     def update_status_to_csv(self) -> None:
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=['Name', 'Difficulty', 'Status'])
+            writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
             writer.writeheader()
             for solved_problem in self.solved_problems:
                 writer.writerow(solved_problem.to_dict())
@@ -199,6 +208,9 @@ if __name__ == '__main__':
     KTG.create_folders_for_different_difficulties()
     KTG.load_solved_problem_status_csv()
     if KTG.login():
-        KTG.get_solved_problems()
-        KTG.get_codes_for_solved_problems()
+        if KTG.update:
+            KTG.get_codes_for_solved_problems()
+        else:
+            KTG.get_solved_problems()
+            KTG.get_codes_for_solved_problems()
         KTG.update_status_to_csv()
