@@ -1,8 +1,9 @@
 import os
 import sys
 import csv
-from pathlib import Path
 import requests
+import subprocess
+from pathlib import Path
 from functools import cached_property
 from typing import List, Dict
 from bs4 import BeautifulSoup as Soup
@@ -135,7 +136,7 @@ class KattisToGithub:
         - html: BeautifulSoup object created from a HTTP request response.
         - pages: List of query params leading to further pages. The lists contents is updated inside this function.
         """
-        next_pages = [href.attrs['href'] for href in html.find_all('a', href=True) if '?page=' in href.attrs['href']]
+        next_pages = [href.attrs['href'] for href in html.find_all('a', href=True, attrs={'role': 'button'}) if '?page=' in href.attrs['href']]
         for next_page in next_pages:
             if next_page not in pages and next_page != '?page=1':
                 pages += [next_page]
@@ -171,17 +172,22 @@ class KattisToGithub:
             # Obtain links to submissions
             for tag in solved_problem_html.find_all(lambda tag: 'data-submission-id' in tag.attrs):
                 if tag.find('div', {'class': 'status is-status-accepted'}):
-                    link = self.base_url + tag.contents[-1].find('a', href=True).attrs['href']
-                    submission_html = self._get_html(link)
-                    print(link)
+                    submission_link = self.base_url + tag.contents[-1].find('a', href=True).attrs['href']
+                    submission_html = self._get_html(submission_link)
                     if submission_html.find('td', {'data-type': 'lang'}).text == 'Python 3':
                         filename = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
                         code = submission_html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
                         if 'def main():' in code:
                             solved_problem.filename_code_dict[filename] = code
                             solved_problem.status = ProblemStatus.CODE_FOUND
-                            print(solved_problem)
                             solved_problem.write_to_file(self.directory)
+                            for filename in solved_problem.filename_code_dict: # TODO: ONLY CURRENT CODE FOR EACH LANGUAGE HERE. CAUSES UNNECESSAY ITERATION
+                                d = self.directory / f'{solved_problem.difficulty}'
+                                print(d, filename)
+                                print(['git', 'add', f'{filename}'])
+                                print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
+                                #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
+                                #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
                             break
                         else:
                             solved_problem.status = ProblemStatus.CODE_NOT_FOUND
