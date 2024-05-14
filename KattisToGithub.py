@@ -166,7 +166,7 @@ class KattisToGithub:
             for submission_html in self._get_submission_html(solved_problem_html):
                 self._parse_submission(solved_problem, submission_html)
             i += 1
-            if i > 3:
+            if i > 20:
                 break
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
@@ -207,6 +207,22 @@ class KattisToGithub:
                     #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
                     #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
 
+    def create_markdown_table(self):
+        #if not os.path.exists(self.directory / 'README.md'):
+        with open(self.directory / 'README.md', 'w') as md:
+            md.write('## Solved Problems\n')
+            md.write('|Problem|Difficulty|Solutions|\n')
+            md.write('|:-:|:-:|:-:|\n')
+
+            for solved_problem in self.solved_problems:
+                if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
+                    # TODO: Need to know programming language name here!
+                    # TODO: Need to save filenames to csv for this to work properly
+                    solutions = ' '.join([
+                        f'[{filename}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
+                    ])
+                    md.write(f'|{solved_problem.name}|{solved_problem.difficulty}|{solutions}|\n')
+
     def update_status_to_csv(self) -> None:
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
@@ -224,4 +240,5 @@ if __name__ == '__main__':
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
         KTG.git_commit_solutions()
+        KTG.create_markdown_table()
         KTG.update_status_to_csv()
