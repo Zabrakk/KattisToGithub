@@ -1,7 +1,7 @@
 from typing import Dict
 from pathlib import Path
 from enum import IntEnum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 class ProblemStatus(IntEnum):
@@ -17,7 +17,7 @@ class SolvedProblem:
     points: str = None
     difficulty: str = None
     status: int = ProblemStatus.CODE_NOT_FOUND
-    filename_code_dict = {}
+    filename_code_dict: Dict[str, str] = field(default_factory=dict)
 
     def write_to_file(self, directory: Path) -> None:
         # TODO: Expand to write multiple files if different languages found
