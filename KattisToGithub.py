@@ -212,7 +212,7 @@ class KattisToGithub:
         with open(self.directory / 'README.md', 'w') as md:
             md.write('## Solved Problems\n')
             md.write('|Problem|Difficulty|Solutions|\n')
-            md.write('|:-:|:-:|:-:|\n')
+            md.write('|:-|:-|:-|\n')
 
             for solved_problem in self.solved_problems:
                 if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
