@@ -16,7 +16,7 @@ try:
     with open('test/test_credentials.txt', 'r') as f:
         TEST_CREDENTIALS = list(map(str.strip, f.readlines()))
 except:
-    TEST_CREDENTIALS = None
+    TEST_CREDENTIALS = []
 
 
 def use_test_credentials(func):
@@ -79,14 +79,10 @@ class TestKattisToGithub(TestCase):
         assert self.KTG.password == PASSWORD
         assert self.KTG.directory == Path(__file__).parent
 
-    def test_create_folders_for_different_difficulties(self):
-        self.KTG.create_folders_for_different_difficulties()
-        assert os.path.exists('test/Easy')
-        assert os.path.exists('test/Medium')
-        assert os.path.exists('test/Hard')
-        os.rmdir('test/Easy')
-        os.rmdir('test/Medium')
-        os.rmdir('test/Hard')
+    def test_create_folders_for_solutions(self):
+        self.KTG.create_folders_for_solutions()
+        assert os.path.exists('test/Solutions')
+        os.rmdir('test/Solutions')
 
     def test_load_solved_problem_status_csv(self):
         with open('test/status.csv', 'w', newline='') as csv_file:

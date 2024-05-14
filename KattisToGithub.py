@@ -29,14 +29,13 @@ class KattisToGithub:
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
 
-    def create_folders_for_different_difficulties(self) -> None:
+    def create_folders_for_solutions(self) -> None:
         """
-        Creates a folder for each of the different problem difficulties if they don't already exist
+        Creates a folder called Solutions. The code's of solved problems will be stored there
         """
-        for difficulty in ['Easy', 'Medium', 'Hard']:
-            if not os.path.exists(self.directory / difficulty):
-                print(f'#: Creating folder for {difficulty} problem solutions')
-                os.mkdir(self.directory / difficulty)
+        if not os.path.exists(self.directory / 'Solutions'):
+            print(f'#: Creating folder for problem solutions')
+            os.mkdir(self.directory / 'Solutions')
 
     def load_solved_problem_status_csv(self) -> None:
         if os.path.exists(self.directory / 'status.csv'):
@@ -219,13 +218,10 @@ class KattisToGithub:
 if __name__ == '__main__':
     KTG = KattisToGithub()
     KTG.get_run_details_from_sys_argv()
-    KTG.create_folders_for_different_difficulties()
+    KTG.create_folders_for_solutions()
     KTG.load_solved_problem_status_csv()
     if KTG.login():
-        if KTG.update:
-            KTG.get_codes_for_solved_problems()
-        else:
-            KTG.get_solved_problems()
-            KTG.get_codes_for_solved_problems()
+        KTG.get_solved_problems()
+        KTG.get_codes_for_solved_problems()
         KTG.git_commit_solutions()
         KTG.update_status_to_csv()
