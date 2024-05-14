@@ -197,16 +197,23 @@ class KattisToGithub:
             solved_problem.filename_code_dict[filename] = code
             solved_problem.status = ProblemStatus.CODE_FOUND
             solved_problem.write_to_file(self.directory)
-            # TODO: DO THE FOLLOWING AFTER CODE HAS BEEN OBTAINED FOR ALL PROBLEMS
-            #for filename in solved_problem.filename_code_dict: # TODO: ONLY CURRENT CODE FOR EACH LANGUAGE HERE. CAUSES UNNECESSAY ITERATION
-            #    d = self.directory / f'{solved_problem.difficulty}'
-            #    print(d, filename)
-            #    print(['git', 'add', f'{filename}'])
-            #    print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
-                #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
-                #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
         else:
             solved_problem.status = ProblemStatus.CODE_NOT_FOUND
+
+    def git_commit_solutions(self) -> None:
+        solutions_to_commit = [solved_problem for solved_problem in self.solved_problems if len(solved_problem.filename_code_dict) > 0]
+        if len(solutions_to_commit) > 5:
+            for solved_problem in solutions_to_commit:
+                for filename in solved_problem.filename_code_dict:
+                    print(['git', 'add', f'{filename}'])
+            print(['git', 'commit', f'-m Added new solutions'])
+        else:
+            for solved_problem in solutions_to_commit:
+                for filename in solved_problem.filename_code_dict:
+                    print(['git', 'add', f'{filename}'])
+                    print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
+                    #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
+                    #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
 
     def update_status_to_csv(self) -> None:
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
@@ -227,4 +234,5 @@ if __name__ == '__main__':
         else:
             KTG.get_solved_problems()
             KTG.get_codes_for_solved_problems()
+        KTG.git_commit_solutions()
         KTG.update_status_to_csv()
