@@ -5,7 +5,7 @@ import requests
 import subprocess
 from pathlib import Path
 from functools import cached_property
-from typing import List, Dict
+from typing import List, Dict, Generator
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
 from src.argument_parser import parse_arguments
@@ -162,38 +162,51 @@ class KattisToGithub:
         print('#: Starting to fetch codes for solved problems')
         i = 0
         for solved_problem in self.solved_problems:
-            if self.update and solved_problem.status != ProblemStatus.UPDATE:
-                print(f'#: Skipping {solved_problem.name}, status != UPDATE')
-                continue
-            if solved_problem.status == 1:
-                print(f'#: Not updating solution for {solved_problem.name}')
+            if not self._should_look_for_code(solved_problem):
                 continue
             solved_problem_html = self._get_html(solved_problem.link)
-            # Obtain links to submissions
-            for tag in solved_problem_html.find_all(lambda tag: 'data-submission-id' in tag.attrs):
-                if tag.find('div', {'class': 'status is-status-accepted'}):
-                    submission_link = self.base_url + tag.contents[-1].find('a', href=True).attrs['href']
-                    submission_html = self._get_html(submission_link)
-                    if submission_html.find('td', {'data-type': 'lang'}).text == 'Python 3':
-                        filename = submission_html.find('span', attrs={'class': 'mt-2'}).code.text
-                        code = submission_html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
-                        if 'def main():' in code:
-                            solved_problem.filename_code_dict[filename] = code
-                            solved_problem.status = ProblemStatus.CODE_FOUND
-                            solved_problem.write_to_file(self.directory)
-                            for filename in solved_problem.filename_code_dict: # TODO: ONLY CURRENT CODE FOR EACH LANGUAGE HERE. CAUSES UNNECESSAY ITERATION
-                                d = self.directory / f'{solved_problem.difficulty}'
-                                print(d, filename)
-                                print(['git', 'add', f'{filename}'])
-                                print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
-                                #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
-                                #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
-                            break
-                        else:
-                            solved_problem.status = ProblemStatus.CODE_NOT_FOUND
+            for submission_html in self._get_submission_html(solved_problem_html):
+                self._parse_submission(solved_problem, submission_html)
             i += 1
             if i > 3:
                 break
+
+    def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
+        if self.update and solved_problem.status != ProblemStatus.UPDATE:
+            print(f'#: Skipping {solved_problem.name}, status != UPDATE')
+            return False
+        if solved_problem.status == 1:
+            print(f'#: Not updating solution for {solved_problem.name}')
+            return False
+        return True
+
+    def _get_submission_html(self, html: Soup) -> Generator[Soup, None, None]:
+        for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
+            if tr.find('div', {'class': 'status is-status-accepted'}):
+                submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
+                yield self._get_html(submission_link)
+
+    def _parse_submission(self, solved_problem: SolvedProblem, html: Soup) -> None:
+        filename = html.find('span', attrs={'class': 'mt-2'}).code.text
+        if filename in solved_problem.filename_code_dict:
+            print(f'#: Not getting older solution for {filename}')
+            return
+        code = html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
+        if html.find('td', {'data-type': 'lang'}).text == 'Python 3' and 'def main():' in code:
+            print(f'#: Getting code for {solved_problem.name}')
+            solved_problem.filename_code_dict[filename] = code
+            solved_problem.status = ProblemStatus.CODE_FOUND
+            solved_problem.write_to_file(self.directory)
+            # TODO: DO THE FOLLOWING AFTER CODE HAS BEEN OBTAINED FOR ALL PROBLEMS
+            #for filename in solved_problem.filename_code_dict: # TODO: ONLY CURRENT CODE FOR EACH LANGUAGE HERE. CAUSES UNNECESSAY ITERATION
+            #    d = self.directory / f'{solved_problem.difficulty}'
+            #    print(d, filename)
+            #    print(['git', 'add', f'{filename}'])
+            #    print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
+                #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
+                #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
+        else:
+            solved_problem.status = ProblemStatus.CODE_NOT_FOUND
 
     def update_status_to_csv(self) -> None:
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
