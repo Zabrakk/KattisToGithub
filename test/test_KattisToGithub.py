@@ -78,12 +78,6 @@ class TestKattisToGithub(TestCase):
         assert self.KTG.user == USER
         assert self.KTG.password == PASSWORD
         assert self.KTG.directory == Path(__file__).parent
-        assert self.KTG.update is False
-
-    def test_get_run_details_from_sys_argv_update_only(self):
-        with mock.patch('sys.argv', ['', '-u', USER, '-p', PASSWORD, '-d', DIRECTORY, '--update']):
-            self.KTG.get_run_details_from_sys_argv()
-            assert self.KTG.update is True
 
     def test_create_folders_for_different_difficulties(self):
         self.KTG.create_folders_for_different_difficulties()

@@ -28,7 +28,6 @@ class KattisToGithub:
         self.user = parser.user
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
-        self.update = parser.update
 
     def create_folders_for_different_difficulties(self) -> None:
         """
@@ -172,13 +171,7 @@ class KattisToGithub:
                 break
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
-        if self.update and solved_problem.status != ProblemStatus.UPDATE:
-            print(f'#: Skipping {solved_problem.name}, status != UPDATE')
-            return False
-        if solved_problem.status == 1:
-            print(f'#: Not updating solution for {solved_problem.name}')
-            return False
-        return True
+        return solved_problem.status != 1
 
     def _get_submission_html(self, html: Soup) -> Generator[Soup, None, None]:
         for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
