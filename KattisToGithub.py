@@ -225,8 +225,17 @@ class KattisToGithub:
                     #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
-        #if not os.path.exists(self.directory / 'README.md'):
+        md_content = []
+        if os.path.exists(self.directory / 'README.md'):
+            with open(self.directory / 'README.md', 'r') as md:
+                md_content = md.readlines()
+            try:
+                md_content = md_content[:md_content.index('## Solved Problems\n')]
+            except ValueError:
+                md_content += ['\n']
+
         with open(self.directory / 'README.md', 'w') as md:
+            md.writelines(md_content)
             md.write('## Solved Problems\n')
             md.write('|Problem|Difficulty|Solutions|\n')
             md.write('|:-|:-|:-|\n')
@@ -255,6 +264,6 @@ if __name__ == '__main__':
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
-        #KTG.git_commit_solutions()
+        KTG.git_commit_solutions()
         KTG.create_markdown_table()
-        #KTG.update_status_to_csv()
+        KTG.update_status_to_csv()
