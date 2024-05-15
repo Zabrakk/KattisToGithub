@@ -240,6 +240,7 @@ class KattisToGithub:
         for solved_problem in self.solved_problems:
             if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
                 # TODO: Need to save filenames to csv for this to work properly
+                # TODO: SORT BY DIFFICULTY
                 solutions = ' '.join([
                     f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
                 ])
