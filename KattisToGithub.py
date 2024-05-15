@@ -225,28 +225,33 @@ class KattisToGithub:
                     #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
-        md_content = []
         if os.path.exists(self.directory / 'README.md'):
             with open(self.directory / 'README.md', 'r') as md:
-                md_content = md.readlines()
+                original_md_content = md.readlines()
             try:
-                md_content = md_content[:md_content.index('## Solved Problems\n')]
+                new_md_content = original_md_content[:original_md_content.index('## Solved Problems\n')]
             except ValueError:
-                md_content += ['\n']
+                new_md_content = original_md_content + ['\n']
+
+        new_md_content += ['## Solved Problems\n']
+        new_md_content += ['|Problem|Difficulty|Solutions|\n']
+        new_md_content += ['|:-|:-|:-|\n']
+
+        for solved_problem in self.solved_problems:
+            if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
+                # TODO: Need to save filenames to csv for this to work properly
+                solutions = ' '.join([
+                    f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
+                ])
+                new_md_content += [f'|{solved_problem.name}|{solved_problem.difficulty}|{solutions}|\n']
 
         with open(self.directory / 'README.md', 'w') as md:
-            md.writelines(md_content)
-            md.write('## Solved Problems\n')
-            md.write('|Problem|Difficulty|Solutions|\n')
-            md.write('|:-|:-|:-|\n')
+            md.writelines(new_md_content)
 
-            for solved_problem in self.solved_problems:
-                if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
-                    # TODO: Need to save filenames to csv for this to work properly
-                    solutions = ' '.join([
-                        f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
-                    ])
-                    md.write(f'|{solved_problem.name}|{solved_problem.difficulty}|{solutions}|\n')
+        if new_md_content != original_md_content:
+            print('#: Commiting new version of README.md')
+            print(['git', 'add', f'README.md'])
+            print(['git', 'commit', f'-m Updated README.md'])
 
     def update_status_to_csv(self) -> None:
         with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
