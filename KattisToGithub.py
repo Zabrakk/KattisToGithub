@@ -163,14 +163,30 @@ class KattisToGithub:
             if not self._should_look_for_code(solved_problem):
                 continue
             solved_problem_html = self._get_html(solved_problem.link)
-            for submission_html in self._get_submission_html(solved_problem_html):
-                self._parse_submission(solved_problem, submission_html)
+            for link, language in self._get_submission_link_and_language(solved_problem_html):
+                if language not in solved_problem.filename_language_dict.values():
+                    submission_html = self._get_html(link)
+                    self._parse_submission(solved_problem, submission_html, language)
+                else:
+                    print(f'{language} solution already found for {solved_problem.name}')
+            #for submission_html in self._get_submission_html(solved_problem_html):
+            #    self._parse_submission(solved_problem, submission_html)
             i += 1
-            if i > 20:
+            if i > 3:
                 break
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
         return solved_problem.status != 1
+
+    def _get_submission_link_and_language(self, html: Soup) -> Generator[Soup, str, None]:
+        for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
+            if tr.find('div', {'class': 'status is-status-accepted'}):
+                submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
+                programming_language = tr.find('td', attrs={'data-type': 'lang'}).text
+                yield submission_link, programming_language
+
+    def _get_used_programming_languages(self, solved_problem_html):
+        return [td.text for td in solved_problem_html.find_all('td', attrs={'data-type': 'lang'})]
 
     def _get_submission_html(self, html: Soup) -> Generator[Soup, None, None]:
         for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
@@ -178,15 +194,16 @@ class KattisToGithub:
                 submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
                 yield self._get_html(submission_link)
 
-    def _parse_submission(self, solved_problem: SolvedProblem, html: Soup) -> None:
+    def _parse_submission(self, solved_problem: SolvedProblem, html: Soup, language: str) -> None:
         filename = html.find('span', attrs={'class': 'mt-2'}).code.text
         if filename in solved_problem.filename_code_dict:
             print(f'#: Not getting older solution for {filename}')
             return
         code = html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
-        if html.find('td', {'data-type': 'lang'}).text == 'Python 3' and 'def main():' in code:
+        if language == 'Python 3' and 'def main():' in code:
             print(f'#: Getting code for {solved_problem.name}')
             solved_problem.filename_code_dict[filename] = code
+            solved_problem.filename_language_dict[filename] = language
             solved_problem.status = ProblemStatus.CODE_FOUND
             solved_problem.write_to_file(self.directory)
         else:
@@ -216,10 +233,9 @@ class KattisToGithub:
 
             for solved_problem in self.solved_problems:
                 if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
-                    # TODO: Need to know programming language name here!
                     # TODO: Need to save filenames to csv for this to work properly
                     solutions = ' '.join([
-                        f'[{filename}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
+                        f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
                     ])
                     md.write(f'|{solved_problem.name}|{solved_problem.difficulty}|{solutions}|\n')
 
@@ -239,6 +255,6 @@ if __name__ == '__main__':
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
-        KTG.git_commit_solutions()
+        #KTG.git_commit_solutions()
         KTG.create_markdown_table()
-        KTG.update_status_to_csv()
+        #KTG.update_status_to_csv()
