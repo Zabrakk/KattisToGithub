@@ -12,7 +12,8 @@ class ProblemStatus(IntEnum):
 
 @dataclass
 class SolvedProblem:
-    link: str = None
+    problem_link: str = None
+    submissions_link: str = None
     name: str = None
     points: str = None
     difficulty: str = None
@@ -27,12 +28,12 @@ class SolvedProblem:
                 file.write(self.filename_code_dict[filename])
 
     def to_dict(self) -> Dict:
-        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value, 'Link': self.link}
+        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value, 'ProblemLink': self.problem_link, 'SubmissionsLink': self.submissions_link}
 
     def __repr__(self) -> str:
         return \
 f'''Problem {self.name}
-Link {self.link}
+Link {self.submissions_link}
 Points {self.points}
 Difficulty {self.difficulty}
 Status {self.status._name_}
