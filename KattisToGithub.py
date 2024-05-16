@@ -53,7 +53,8 @@ class KattisToGithub:
             name=row['Name'],
             difficulty=row['Difficulty'],
             status=ProblemStatus(int(row['Status'])),
-            link=row['Link']
+            problem_link=row['ProblemLink'],
+            submissions_link=row['SubmissionsLink']
         )
 
     @property
@@ -74,7 +75,7 @@ class KattisToGithub:
 
     @cached_property
     def _solved_problem_links(self) -> str:
-        return [problem.link for problem in self.solved_problems]
+        return [problem.submissions_link for problem in self.solved_problems]
 
     def _get_CSRF_token(self) -> str:
         """
@@ -121,7 +122,7 @@ class KattisToGithub:
             html = self._get_html(self._solved_problems_url + page)
             for tr in html.find('div', attrs={'id': 'problems-tab'}).find('tbody').find_all('tr'):
                 sp = self._parse_solved_problem(tr)
-                if sp.link not in self._solved_problem_links:
+                if sp.submissions_link not in self._solved_problem_links:
                     self.solved_problems += [sp]
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
@@ -149,8 +150,10 @@ class KattisToGithub:
         Returns:
         - SolvedProblem
         """
+        problem_link = html.contents[0].find('a')['href']
         return SolvedProblem(
-            link = self._solved_problem_submission_url + html.contents[0].find('a')['href'].replace('/problems/', ''),
+            problem_link=BASE_URL + problem_link,
+            submissions_link = self._solved_problem_submission_url + problem_link.replace('/problems/', ''),
             name = html.contents[0].text,
             points = html.contents[4].find('span').text,
             difficulty = html.contents[4].find('span').attrs['class'][-1].split('_')[1].capitalize()
@@ -162,7 +165,7 @@ class KattisToGithub:
         for solved_problem in self.solved_problems:
             if not self._should_look_for_code(solved_problem):
                 continue
-            solved_problem_html = self._get_html(solved_problem.link)
+            solved_problem_html = self._get_html(solved_problem.submissions_link)
             for link, language in self._get_submission_link_and_language(solved_problem_html):
                 if language not in solved_problem.filename_language_dict.values():
                     submission_html = self._get_html(link)
