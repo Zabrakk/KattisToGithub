@@ -88,14 +88,17 @@ class TestKattisToGithub(TestCase):
         with open('test/status.csv', 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
             writer.writeheader()
-            writer.writerow({'Name': 'Test', 'Difficulty': 'Easy', 'Status': 1, 'Link': 'test-link'})
+            writer.writerow({'Name': 'Test', 'Difficulty': 'Easy', 'Status': 1,'ProblemLink': 'problem_link',
+                             'SubmissionsLink': 'submissions-link', 'Solutions': 'Python 3|test.py#C++|test.cpp'})
         self.KTG.load_solved_problem_status_csv()
         assert len(self.KTG.solved_problems) == 1
         sp = self.KTG.solved_problems[0]
         assert sp.name == 'Test'
         assert sp.difficulty == 'Easy'
         assert sp.status == 1
-        assert sp.link == 'test-link'
+        assert sp.problem_link == 'problem_link'
+        assert sp.submissions_link == 'submissions-link'
+        assert sp.filename_language_dict == {'test.py': 'Python 3', 'test.cpp': 'C++'}
         os.remove('test/status.csv')
 
     def test_load_solved_problem_status_csv_no_status_csv(self):
@@ -151,7 +154,7 @@ class TestKattisToGithub(TestCase):
 
     def test_parse_solved_problem(self):
         sp = self.KTG._parse_solved_problem(MockSoup())
-        assert sp.link == f'https://open.kattis.com/users/{USER}?tab=submissions&problem=CorrectLink'
+        assert sp.submissions_link == f'https://open.kattis.com/users/{USER}?tab=submissions&problem=CorrectLink'
         assert sp.name == 'ProblemName'
         assert sp.points == '3.0'
         assert sp.difficulty == 'Medium'
