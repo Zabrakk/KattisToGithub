@@ -54,7 +54,6 @@ class KattisToGithub:
             for entry in row['Solutions'].split('#'):
                 language, filename = entry.split('|')
                 filename_language_dict[filename] = language
-            print(filename_language_dict)
         return SolvedProblem(
             name=row['Name'],
             difficulty=row['Difficulty'],
