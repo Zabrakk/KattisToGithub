@@ -248,7 +248,7 @@ class KattisToGithub:
                 solutions = ' '.join([
                     f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
                 ])
-                new_md_content += [f'|{solved_problem.name}|{solved_problem.difficulty}|{solutions}|\n']
+                new_md_content += [f'|[{solved_problem.name}]({solved_problem.problem_link})|{solved_problem.difficulty}|{solutions}|\n']
 
         with open(self.directory / 'README.md', 'w') as md:
             md.writelines(new_md_content)
