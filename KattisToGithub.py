@@ -237,7 +237,7 @@ class KattisToGithub:
         new_md_content += ['|Problem|Difficulty|Solutions|\n']
         new_md_content += ['|:-|:-|:-|\n']
 
-        for solved_problem in self.solved_problems:
+        for solved_problem in sorted(self.solved_problems, key=lambda x: ['Hard', 'Medium', 'Easy'].index(x.difficulty)):
             if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
                 # TODO: Need to save filenames to csv for this to work properly
                 # TODO: SORT BY DIFFICULTY
