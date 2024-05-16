@@ -28,7 +28,10 @@ class SolvedProblem:
                 file.write(self.filename_code_dict[filename])
 
     def to_dict(self) -> Dict:
-        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value, 'ProblemLink': self.problem_link, 'SubmissionsLink': self.submissions_link}
+        solutions = '#'.join(['|'.join([language, filename]) for filename, language in self.filename_language_dict.items()])
+        return {'Name': self.name, 'Difficulty': self.difficulty, 'Status': self.status.value,
+                'ProblemLink': self.problem_link, 'SubmissionsLink': self.submissions_link, 'Solutions': solutions
+        }
 
     def __repr__(self) -> str:
         return \
