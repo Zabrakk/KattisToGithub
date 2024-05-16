@@ -234,6 +234,7 @@ class KattisToGithub:
                 new_md_content = original_md_content + ['\n']
 
         new_md_content += ['## Solved Problems\n']
+        new_md_content += ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
         new_md_content += ['|Problem|Difficulty|Solutions|\n']
         new_md_content += ['|:-|:-|:-|\n']
 
