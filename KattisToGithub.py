@@ -49,12 +49,19 @@ class KattisToGithub:
                     print(f'#: Status.csv was empty')
 
     def _load_solved_problem_from_csv_row(self, row: Dict) -> SolvedProblem:
+        filename_language_dict = {}
+        if len(row['Solutions']) > 0:
+            for entry in row['Solutions'].split('#'):
+                language, filename = entry.split('|')
+                filename_language_dict[filename] = language
+            print(filename_language_dict)
         return SolvedProblem(
             name=row['Name'],
             difficulty=row['Difficulty'],
             status=ProblemStatus(int(row['Status'])),
             problem_link=row['ProblemLink'],
-            submissions_link=row['SubmissionsLink']
+            submissions_link=row['SubmissionsLink'],
+            filename_language_dict=filename_language_dict
         )
 
     @property
@@ -175,7 +182,7 @@ class KattisToGithub:
             #for submission_html in self._get_submission_html(solved_problem_html):
             #    self._parse_submission(solved_problem, submission_html)
             i += 1
-            if i > 3:
+            if i > 10:
                 break
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
@@ -243,10 +250,8 @@ class KattisToGithub:
 
         for solved_problem in sorted(self.solved_problems, key=lambda x: ['Hard', 'Medium', 'Easy'].index(x.difficulty)):
             if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
-                # TODO: Need to save filenames to csv for this to work properly
-                # TODO: SORT BY DIFFICULTY
                 solutions = ' '.join([
-                    f'[{solved_problem.filename_language_dict[filename]}](Solutions/{filename})' for filename in solved_problem.filename_code_dict
+                    f'[{language}](Solutions/{filename})' for filename, language in solved_problem.filename_language_dict.items()
                 ])
                 new_md_content += [f'|[{solved_problem.name}]({solved_problem.problem_link})|{solved_problem.difficulty}|{solutions}|\n']
 
