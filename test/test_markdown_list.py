@@ -68,7 +68,7 @@ class TestMarkdownList(TestCase):
     def test_sort_solved_problems_by_difficulty(self):
         expected_result = ['Hard', 'Medium', 'Easy', 'Easy']
         self.md_list._sort_solved_problems_by_difficulty()
-        for i, entry in enumerate(self.md_list._solved_problems):
+        for i, entry in enumerate(self.md_list.solved_problems):
             assert entry.difficulty == expected_result[i]
 
     def test_create_solved_problem_list(self):
