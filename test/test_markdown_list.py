@@ -64,6 +64,21 @@ class TestMarkdownList(TestCase):
             md_file.writelines(original_contents)
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
+        assert self.md_list.new_contents == original_contents + ['\n']
+
+    def test_load_existing_README_contents_README_already_has_list(self):
+        original_contents = [
+            '# KATTIS SOLUTIONS\n',
+            'This repository includes my solutions to Kattis problem\n',
+            '## Solved Problems\n',
+            'line1\n',
+            'line2\n'
+        ]
+        with open(TEST_FILE, 'w') as md_file:
+            md_file.writelines(original_contents)
+        self.md_list.load_existing_README_contents()
+        assert self.md_list.original_contents == original_contents
+        assert self.md_list.new_contents == original_contents[:2]
 
     def test_sort_solved_problems_by_difficulty(self):
         expected_result = ['Hard', 'Medium', 'Easy', 'Easy']

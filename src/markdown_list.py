@@ -13,12 +13,27 @@ class MarkdownList:
     def solved_problems(self) -> List[SolvedProblem]:
         return self.__solved_problems
 
+    @property
+    def original_contents(self) -> List[str]:
+        return self.__original_contents
+
+    @property
+    def new_contents(self) -> List[str]:
+        return self.__new_contents
+
     def load_existing_README_contents(self) -> None:
         if os.path.exists(self.__filepath):
             with open(self.__filepath, 'r') as md_file:
-                self.original_contents = md_file.readlines()
+                self.__original_contents = md_file.readlines()
+                self.__new_contents = self.__parse_loaded_README(self.__original_contents)
         else:
-            self.original_contents = []
+            self.__original_contents = []
+
+    def __parse_loaded_README(self, contents: List[str]) -> List[str]:
+        try:
+            return contents[:contents.index('## Solved Problems\n')]
+        except ValueError:
+            return contents + ['\n']
 
     def _sort_solved_problems_by_difficulty(self) -> List[SolvedProblem]:
         order = ['Hard', 'Medium', 'Easy']
