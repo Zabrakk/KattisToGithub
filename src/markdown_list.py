@@ -1,6 +1,7 @@
 import os
 from typing import List
 from pathlib import Path
+from src.constants import README_LIST_TITLE, KTG_AD
 from src.solved_problem import SolvedProblem, ProblemStatus
 
 
@@ -25,18 +26,17 @@ class MarkdownList:
         if os.path.exists(self.__filepath):
             with open(self.__filepath, 'r') as md_file:
                 self.__original_contents = md_file.readlines()
-                self.__new_contents = self.__parse_loaded_README(self.__original_contents)
         else:
             self.__original_contents = []
-            self.__new_contents = []
+        self.__new_contents = self.__parse_loaded_README(self.__original_contents)
 
     def __parse_loaded_README(self, contents: List[str]) -> List[str]:
         try:
-            new_contents = contents[:contents.index('## Solved Problems\n')]
+            new_contents = contents[:contents.index(README_LIST_TITLE)]
         except ValueError:
             new_contents = contents + ['\n']
-        new_contents += ['## Solved Problems\n']
-        return new_contents + ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
+        new_contents += [README_LIST_TITLE]
+        return new_contents + [KTG_AD]
 
     def _sort_solved_problems_by_difficulty(self) -> List[SolvedProblem]:
         order = ['Hard', 'Medium', 'Easy']

@@ -1,6 +1,8 @@
 import os
+from typing import List
 from pathlib import Path
 from unittest import TestCase, mock
+from src.constants import KTG_AD, README_LIST_TITLE
 from src.markdown_list import MarkdownList
 from src.solved_problem import SolvedProblem, ProblemStatus
 
@@ -47,40 +49,51 @@ class TestMarkdownList(TestCase):
             os.remove(TEST_FILE)
         return super().tearDown()
 
+    def __write_to_README(self, contents: List[str]):
+        with open(TEST_FILE, 'w') as md_file:
+            md_file.writelines(contents)
+
     def test_load_existing_README_contents_no_README(self):
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == []
-        assert self.md_list.new_contents == []
+        assert self.md_list.new_contents == [
+            '\n',
+            README_LIST_TITLE,
+            KTG_AD
+        ]
 
     def test_load_existing_README_contents_no_contents(self):
+        self.__write_to_README([])
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == []
-        assert self.md_list.new_contents == []
+        assert self.md_list.new_contents == [
+            '\n',
+            README_LIST_TITLE,
+            KTG_AD
+        ]
 
     def test_load_existing_README_contents_README_has_content(self):
         original_contents = [
             '# KATTIS SOLUTIONS\n',
             'This repository includes my solutions to Kattis problems'
         ]
-        with open(TEST_FILE, 'w') as md_file:
-            md_file.writelines(original_contents)
+        self.__write_to_README(original_contents)
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents + ['\n'] + ['## Solved Problems\n'] + ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
+        assert self.md_list.new_contents == original_contents + ['\n'] + [README_LIST_TITLE] + [KTG_AD]
 
     def test_load_existing_README_contents_README_already_has_list(self):
         original_contents = [
             '# KATTIS SOLUTIONS\n',
             'This repository includes my solutions to Kattis problem\n',
-            '## Solved Problems\n',
+            README_LIST_TITLE,
             'line1\n',
             'line2\n'
         ]
-        with open(TEST_FILE, 'w') as md_file:
-            md_file.writelines(original_contents)
+        self.__write_to_README(original_contents)
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents[:3] + ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
+        assert self.md_list.new_contents == original_contents[:3] + [KTG_AD]
 
     def test_sort_solved_problems_by_difficulty(self):
         expected_result = ['Hard', 'Medium', 'Easy', 'Easy']
@@ -98,8 +111,8 @@ class TestMarkdownList(TestCase):
 
     def test_save_contents_to_README(self):
         contents_to_save = [
-            '## Solved Problems\n',
-            'Created with KTG\n',
+            README_LIST_TITLE,
+            KTG_AD,
             '|1|2|3|\n'
         ]
         self.md_list._save_contents_to_README(contents_to_save)
