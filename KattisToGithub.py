@@ -8,6 +8,7 @@ from functools import cached_property
 from typing import List, Dict, Generator
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
+from src.markdown_list import MarkdownList
 from src.argument_parser import parse_arguments
 from src.solved_problem import SolvedProblem, ProblemStatus
 
@@ -234,31 +235,9 @@ class KattisToGithub:
                     #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
-        if os.path.exists(self.directory / 'README.md'):
-            with open(self.directory / 'README.md', 'r') as md:
-                original_md_content = md.readlines()
-            try:
-                new_md_content = original_md_content[:original_md_content.index('## Solved Problems\n')]
-            except ValueError:
-                new_md_content = original_md_content + ['\n']
-
-        new_md_content += ['## Solved Problems\n']
-        new_md_content += ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
-        new_md_content += ['|Problem|Difficulty|Solutions|\n']
-        new_md_content += ['|:-|:-|:-|\n']
-
-        for solved_problem in sorted(self.solved_problems, key=lambda x: ['Hard', 'Medium', 'Easy'].index(x.difficulty)):
-            if solved_problem.status != ProblemStatus.CODE_NOT_FOUND:
-                solutions = ' '.join([
-                    f'[{language}](Solutions/{filename})' for filename, language in solved_problem.filename_language_dict.items()
-                ])
-                new_md_content += [f'|[{solved_problem.name}]({solved_problem.problem_link})|{solved_problem.difficulty}|{solutions}|\n']
-
-        with open(self.directory / 'README.md', 'w') as md:
-            md.writelines(new_md_content)
-
-        if new_md_content != original_md_content:
-            print('#: Commiting new version of README.md')
+        md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
+        md_list.create()
+        if md_list.should_add_and_commit:
             print(['git', 'add', f'README.md'])
             print(['git', 'commit', f'-m Updated README.md'])
 
