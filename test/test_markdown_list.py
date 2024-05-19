@@ -123,3 +123,12 @@ class TestMarkdownList(TestCase):
             f'|[{SOLVED_PROBLEMS[0].name}]({SOLVED_PROBLEMS[0].problem_link})|{SOLVED_PROBLEMS[0].difficulty}|' + self.__create_problem_list_entry(0) + '\n',
             f'|[{SOLVED_PROBLEMS[1].name}]({SOLVED_PROBLEMS[1].problem_link})|{SOLVED_PROBLEMS[1].difficulty}|' + self.__create_problem_list_entry(1) + '\n'
         ]
+
+    def test_should_add_and_commit_property_true(self):
+        self.md_list.create()
+        assert self.md_list.should_add_and_commit is True
+
+    def test_should_add_and_commit_property_false(self):
+        self.md_list.create()
+        self.md_list.create()
+        assert self.md_list.should_add_and_commit is False

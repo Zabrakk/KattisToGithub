@@ -22,6 +22,10 @@ class MarkdownList:
     def new_contents(self) -> List[str]:
         return self.__new_contents
 
+    @property
+    def should_add_and_commit(self) -> bool:
+        return self.__new_contents != self.__original_contents
+
     def _load_existing_README_contents(self) -> None:
         if os.path.exists(self.__filepath):
             with open(self.__filepath, 'r') as md_file:
