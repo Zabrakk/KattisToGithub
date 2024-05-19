@@ -50,10 +50,12 @@ class TestMarkdownList(TestCase):
     def test_load_existing_README_contents_no_README(self):
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == []
+        assert self.md_list.new_contents == []
 
     def test_load_existing_README_contents_no_contents(self):
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == []
+        assert self.md_list.new_contents == []
 
     def test_load_existing_README_contents_README_has_content(self):
         original_contents = [
@@ -64,7 +66,7 @@ class TestMarkdownList(TestCase):
             md_file.writelines(original_contents)
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents + ['\n']
+        assert self.md_list.new_contents == original_contents + ['\n'] + ['## Solved Problems\n'] + ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
 
     def test_load_existing_README_contents_README_already_has_list(self):
         original_contents = [
@@ -78,7 +80,7 @@ class TestMarkdownList(TestCase):
             md_file.writelines(original_contents)
         self.md_list.load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents[:2]
+        assert self.md_list.new_contents == original_contents[:3] + ['<sub><i>Created with [KattisToGithub](https://github.com/Zabrakk/KattisToGithub)</i></sub>\n']
 
     def test_sort_solved_problems_by_difficulty(self):
         expected_result = ['Hard', 'Medium', 'Easy', 'Easy']
@@ -87,9 +89,9 @@ class TestMarkdownList(TestCase):
             assert entry.difficulty == expected_result[i]
 
     def test_create_solved_problem_list(self):
-        self.md_list._create_solved_problem_list()
-        assert len(self.md_list.solved_problem_list) == 3
-        for i, entry in enumerate(self.md_list.solved_problem_list):
+        solved_problem_list = self.md_list._create_solved_problem_list()
+        assert len(solved_problem_list) == 3
+        for i, entry in enumerate(solved_problem_list):
             solutions = ' '.join([f'[{language}](Solutions/{filename})' for filename, language in SOLVED_PROBLEMS[i].filename_language_dict.items()])
             expected_result = f'|[{SOLVED_PROBLEMS[i].name}]({SOLVED_PROBLEMS[i].problem_link})|{SOLVED_PROBLEMS[i].difficulty}|' + solutions
             assert entry == expected_result
