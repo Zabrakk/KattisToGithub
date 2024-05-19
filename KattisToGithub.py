@@ -179,8 +179,6 @@ class KattisToGithub:
                     self._parse_submission(solved_problem, submission_html, language)
                 else:
                     print(f'{language} solution already found for {solved_problem.name}')
-            #for submission_html in self._get_submission_html(solved_problem_html):
-            #    self._parse_submission(solved_problem, submission_html)
             i += 1
             if i > 10:
                 break
