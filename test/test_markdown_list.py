@@ -95,3 +95,13 @@ class TestMarkdownList(TestCase):
             solutions = ' '.join([f'[{language}](Solutions/{filename})' for filename, language in SOLVED_PROBLEMS[i].filename_language_dict.items()])
             expected_result = f'|[{SOLVED_PROBLEMS[i].name}]({SOLVED_PROBLEMS[i].problem_link})|{SOLVED_PROBLEMS[i].difficulty}|' + solutions
             assert entry == expected_result
+
+    def test_save_contents_to_README(self):
+        contents_to_save = [
+            '## Solved Problems\n',
+            'Created with KTG\n',
+            '|1|2|3|\n'
+        ]
+        self.md_list._save_contents_to_README(contents_to_save)
+        with open(TEST_FILE, 'r') as md_file:
+            assert md_file.readlines() == contents_to_save
