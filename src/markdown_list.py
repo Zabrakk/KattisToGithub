@@ -1,6 +1,7 @@
 import os
 from typing import List
 from pathlib import Path
+from copy import deepcopy
 from src.constants import README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING
 from src.solved_problem import SolvedProblem, ProblemStatus
 
@@ -8,7 +9,7 @@ from src.solved_problem import SolvedProblem, ProblemStatus
 class MarkdownList:
     def __init__(self, directory: Path, solved_problems: List[SolvedProblem]) -> None:
         self.__filepath = directory / 'README.md'
-        self.__solved_problems = solved_problems
+        self.__solved_problems = deepcopy(solved_problems)
 
     @property
     def solved_problems(self) -> List[SolvedProblem]:
