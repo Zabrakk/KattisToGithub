@@ -1,7 +1,7 @@
 import os
 from typing import List
 from pathlib import Path
-from src.constants import README_LIST_TITLE, KTG_AD
+from src.constants import README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING
 from src.solved_problem import SolvedProblem, ProblemStatus
 
 
@@ -22,7 +22,7 @@ class MarkdownList:
     def new_contents(self) -> List[str]:
         return self.__new_contents
 
-    def load_existing_README_contents(self) -> None:
+    def _load_existing_README_contents(self) -> None:
         if os.path.exists(self.__filepath):
             with open(self.__filepath, 'r') as md_file:
                 self.__original_contents = md_file.readlines()
@@ -35,16 +35,16 @@ class MarkdownList:
             new_contents = contents[:contents.index(README_LIST_TITLE)]
         except ValueError:
             new_contents = contents + ['\n']
-        new_contents += [README_LIST_TITLE]
-        return new_contents + [KTG_AD]
+        new_contents += [README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
+        return new_contents
 
-    def _sort_solved_problems_by_difficulty(self) -> List[SolvedProblem]:
+    def _sort_solved_problems_by_difficulty(self) -> None:
         order = ['Hard', 'Medium', 'Easy']
         self.__solved_problems.sort(key=lambda sp: order.index(sp.difficulty))
 
     def _create_solved_problem_list(self) -> List[str]:
         return [
-            f'|[{sp.name}]({sp.problem_link})|{sp.difficulty}|' + self.__create_solutions_tab_content_for_solved_problem(sp)\
+            f'|[{sp.name}]({sp.problem_link})|{sp.difficulty}|' + self.__create_solutions_tab_content_for_solved_problem(sp) + '\n' \
             for sp in self.__solved_problems if sp.status != ProblemStatus.CODE_NOT_FOUND
         ]
 
@@ -56,4 +56,7 @@ class MarkdownList:
             md_file.writelines(contents)
 
     def create(self):
-        pass
+        self._load_existing_README_contents()
+        self._sort_solved_problems_by_difficulty()
+        self.__new_contents += self._create_solved_problem_list()
+        self._save_contents_to_README(self.__new_contents)
