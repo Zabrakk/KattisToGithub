@@ -49,9 +49,13 @@ class TestMarkdownList(TestCase):
             os.remove(TEST_FILE)
         return super().tearDown()
 
-    def __write_to_README(self, contents: List[str]):
+    def __write_to_README(self, contents: List[str]) -> None:
         with open(TEST_FILE, 'w') as md_file:
             md_file.writelines(contents)
+
+    def __read_README(self) -> List[str]:
+        with open(TEST_FILE, 'r') as md_file:
+            return md_file.readlines()
 
     def test_load_existing_README_contents_no_README(self):
         self.md_list.load_existing_README_contents()
@@ -116,5 +120,4 @@ class TestMarkdownList(TestCase):
             '|1|2|3|\n'
         ]
         self.md_list._save_contents_to_README(contents_to_save)
-        with open(TEST_FILE, 'r') as md_file:
-            assert md_file.readlines() == contents_to_save
+        self.__read_README() == contents_to_save
