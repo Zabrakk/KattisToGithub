@@ -1,5 +1,6 @@
 from src.solved_problem import SolvedProblem, ProblemStatus
 
+TEST_DIR = 'test'
 SOLVED_PROBLEMS = [
     SolvedProblem(
         name='Problem1',

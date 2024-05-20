@@ -5,10 +5,8 @@ from copy import deepcopy
 from unittest import TestCase
 from src.constants import README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING
 from src.markdown_list import MarkdownList
-from src.solved_problem import SolvedProblem, ProblemStatus
-from constants import SOLVED_PROBLEMS
+from constants import SOLVED_PROBLEMS, TEST_DIR
 
-TEST_DIR = 'test'
 TEST_FILE = TEST_DIR + '/README.md'
 README_LIST_START = [README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
 
