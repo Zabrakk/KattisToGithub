@@ -19,7 +19,7 @@ class TestCsvHandler(TestCase):
         assert CsvHandler(directory=TEST_FILE)
 
     @unittest.skip(reason='TODO')
-    def test_load_solvd_problems(self):
+    def test_load_solved_problems(self):
         pass
 
     @unittest.skip(reason='TODO')
