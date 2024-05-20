@@ -7,6 +7,7 @@ SOLVED_PROBLEMS = [
         difficulty='Medium',
         status=ProblemStatus.CODE_FOUND,
         problem_link='problem_link1',
+        submissions_link='submissions_link1',
         filename_language_dict={'test1.py': 'Python 3', 'test1.cpp': 'C++'}
     ),
     SolvedProblem(
@@ -14,6 +15,7 @@ SOLVED_PROBLEMS = [
         difficulty='Easy',
         status=ProblemStatus.CODE_FOUND,
         problem_link='problem_link2',
+        submissions_link='submissions_link2',
         filename_language_dict={'test2.py': 'Python 3'}
     ),
     SolvedProblem(
@@ -21,12 +23,14 @@ SOLVED_PROBLEMS = [
         difficulty='Hard',
         status=ProblemStatus.CODE_FOUND,
         problem_link='problem_link3',
+        submissions_link='submissions_link3',
         filename_language_dict={'test3.py': 'Python 3'}
     ),
     SolvedProblem(
         name='Problem4',
         difficulty='Easy',
         status=ProblemStatus.CODE_NOT_FOUND,
-        problem_link='problem_link4'
+        problem_link='problem_link4',
+        submissions_link='submissions_link4',
     ),
 ]
