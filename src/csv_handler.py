@@ -37,14 +37,17 @@ class CsvHandler:
             status=ProblemStatus(int(self.__ensure_not_None(row['Status']))),
             problem_link=self.__ensure_not_None(row['ProblemLink']),
             submissions_link=self.__ensure_not_None(row['SubmissionsLink']),
-            filename_language_dict=self.__build_filename_language_dict_from_str(self.__ensure_not_None(row['Solutions']))
+            filename_language_dict=self.__build_filename_language_dict_from_str(row['Solutions'])
         )
 
     def __build_filename_language_dict_from_str(self, val: str) -> Dict:
         filename_language_dict = {}
-        for entry in val.split('#'):
-            language, filename = entry.split('|')
-            filename_language_dict[filename] = language
+        try:
+            for entry in val.split('#'):
+                language, filename = entry.split('|')
+                filename_language_dict[filename] = language
+        except ValueError as e:
+            print(e)
         return filename_language_dict
 
     def __ensure_not_None(self, val: any) -> any:
@@ -53,5 +56,8 @@ class CsvHandler:
         raise ValueError('None value in csv')
 
     def write_solved_problems_to_csv(self, solved_problems: List[SolvedProblem]) -> None:
-        # TODO
-        pass
+        with open(self.__filepath, 'w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
+            writer.writeheader()
+            for solved_problem in solved_problems:
+                writer.writerow(solved_problem.to_dict())

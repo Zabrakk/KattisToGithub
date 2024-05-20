@@ -54,6 +54,6 @@ class TestCsvHandler(TestCase):
             writer.writerow(SOLVED_PROBLEMS[0].to_dict())
         assert self.csv_hadler.load_solved_problems() == [SOLVED_PROBLEMS[0]]
 
-    @unittest.skip(reason='TODO')
     def test_write_solved_problems_to_csv(self):
-        pass
+        self.csv_hadler.write_solved_problems_to_csv(SOLVED_PROBLEMS)
+        assert self.csv_hadler.load_solved_problems() == SOLVED_PROBLEMS
