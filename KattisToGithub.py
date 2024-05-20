@@ -1,6 +1,5 @@
 import os
 import sys
-import csv
 import requests
 import subprocess
 from pathlib import Path
@@ -8,6 +7,7 @@ from functools import cached_property
 from typing import List, Dict, Generator
 from bs4 import BeautifulSoup as Soup
 from src.constants import *
+from src.csv_handler import CsvHandler
 from src.markdown_list import MarkdownList
 from src.argument_parser import parse_arguments
 from src.solved_problem import SolvedProblem, ProblemStatus
@@ -39,15 +39,7 @@ class KattisToGithub:
             os.mkdir(self.directory / 'Solutions')
 
     def load_solved_problem_status_csv(self) -> None:
-        if os.path.exists(self.directory / 'status.csv'):
-            with open(self.directory / 'status.csv', 'r') as csv_file:
-                try:
-                    reader = csv.DictReader(csv_file, fieldnames=CSV_FIELD_NAMES)
-                    reader.__next__()
-                    for row in reader:
-                        self.solved_problems += [self._load_solved_problem_from_csv_row(row)]
-                except StopIteration:
-                    print(f'#: Status.csv was empty')
+        self.solved_problems = CsvHandler(self.directory).load_solved_problems()
 
     def _load_solved_problem_from_csv_row(self, row: Dict) -> SolvedProblem:
         filename_language_dict = {}
@@ -240,11 +232,7 @@ class KattisToGithub:
             print(['git', 'commit', f'-m Updated README.md'])
 
     def update_status_to_csv(self) -> None:
-        with open(self.directory / 'status.csv', 'w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
-            writer.writeheader()
-            for solved_problem in self.solved_problems:
-                writer.writerow(solved_problem.to_dict())
+        CsvHandler(self.directory).write_solved_problems_to_csv(self.solved_problems)
 
 
 if __name__ == '__main__':
