@@ -13,7 +13,7 @@ class CsvHandler:
     @property
     def filepath(self) -> Path:
         return self.__filepath
-    
+
     def load_solved_problems(self) -> List[SolvedProblem]:
         if not os.path.exists(self.__filepath):
             return []
@@ -47,7 +47,7 @@ class CsvHandler:
                 language, filename = entry.split('|')
                 filename_language_dict[filename] = language
         except ValueError as e:
-            print(e)
+            pass
         return filename_language_dict
 
     def __ensure_not_None(self, val: any) -> any:
