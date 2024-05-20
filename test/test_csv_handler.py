@@ -4,6 +4,7 @@ from unittest import TestCase
 from src.csv_handler import CsvHandler
 from src.solved_problem import SolvedProblem
 from src.constants import CSV_FIELD_NAMES
+from constants import SOLVED_PROBLEMS
 
 TEST_FILE = Path('test/status.csv')
 
@@ -18,7 +19,6 @@ class TestCsvHandler(TestCase):
     def test_create(self):
         assert CsvHandler(directory=TEST_FILE)
 
-    @unittest.skip(reason='TODO')
     def test_load_solved_problems(self):
         pass
 
