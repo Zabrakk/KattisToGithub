@@ -210,12 +210,24 @@ class KattisToGithub:
         #subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=directory, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
+        """
+        Creates / updates the list of SolvedProblems in README.md
+
+        Returns:
+        - None
+        """
         md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
         md_list.create()
         if md_list.should_add_and_commit:
             self.__git_add_and_commit(self.directory, 'README.md', 'Updated README.md')
 
     def update_status_to_csv(self) -> None:
+        """
+        Writes the information on SolvedProblems into status.csv
+
+        Returns:
+        - None
+        """
         self.solved_problems.sort(key=lambda sp: sp.name)
         CsvHandler(self.directory).write_solved_problems_to_csv(self.solved_problems)
 
