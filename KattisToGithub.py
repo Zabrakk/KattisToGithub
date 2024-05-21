@@ -232,6 +232,7 @@ class KattisToGithub:
             print(['git', 'commit', f'-m Updated README.md'])
 
     def update_status_to_csv(self) -> None:
+        self.solved_problems.sort(key=lambda sp: sp.name)
         CsvHandler(self.directory).write_solved_problems_to_csv(self.solved_problems)
 
 
