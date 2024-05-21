@@ -16,10 +16,6 @@ class CsvHandler:
     def __init__(self, directory: Path) -> None:
         self.__filepath = directory / 'status.csv'
 
-    @property
-    def filepath(self) -> Path:
-        return self.__filepath
-
     def load_solved_problems(self) -> List[SolvedProblem]:
         """
         Loads SolvedProblems from <directory>/status.csv
