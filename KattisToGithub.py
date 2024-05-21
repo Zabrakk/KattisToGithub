@@ -201,17 +201,19 @@ class KattisToGithub:
         else:
             for solved_problem in solutions_to_commit:
                 for filename in solved_problem.filename_code_dict:
-                    print(['git', 'add', f'{filename}'])
-                    print(['git', 'commit', f'-m Solution for {solved_problem.name}'])
-                    #subprocess.Popen(['git', 'add', f'{filename}'], cwd=d, stdout=subprocess.DEVNULL).wait()
-                    #subprocess.Popen(['git', 'commit', f'-m Solution for {solved_problem.name}'], cwd=d, stdout=subprocess.DEVNULL).wait()
+                    self.__git_add_and_commit(self.directory, filename, f'Solution for {solved_problem.name}')
+
+    def __git_add_and_commit(self, directory: Path, filename: str, message: str) -> None:
+        print(['git', 'add', f'Solutions/{filename}'])
+        print(['git', 'commit', f'-m {message}'])
+        #subprocess.Popen(['git', 'add', f'Solutions/{filename}'], cwd=directory, stdout=subprocess.DEVNULL).wait()
+        #subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=directory, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
         md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
         md_list.create()
         if md_list.should_add_and_commit:
-            print(['git', 'add', f'README.md'])
-            print(['git', 'commit', f'-m Updated README.md'])
+            self.__git_add_and_commit(self.directory, 'README.md', 'Updated README.md')
 
     def update_status_to_csv(self) -> None:
         self.solved_problems.sort(key=lambda sp: sp.name)
