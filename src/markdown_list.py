@@ -38,8 +38,8 @@ class MarkdownList:
         return self.__new_contents != self.__original_contents
 
     @property
-    def filepath(self) -> Path:
-        return self.__filepath
+    def filename(self) -> Path:
+        return 'README.md'
 
     def _load_existing_README_contents(self) -> None:
         """
