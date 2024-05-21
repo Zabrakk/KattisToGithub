@@ -41,21 +41,6 @@ class KattisToGithub:
     def load_solved_problem_status_csv(self) -> None:
         self.solved_problems = CsvHandler(self.directory).load_solved_problems()
 
-    def _load_solved_problem_from_csv_row(self, row: Dict) -> SolvedProblem:
-        filename_language_dict = {}
-        if len(row['Solutions']) > 0:
-            for entry in row['Solutions'].split('#'):
-                language, filename = entry.split('|')
-                filename_language_dict[filename] = language
-        return SolvedProblem(
-            name=row['Name'],
-            difficulty=row['Difficulty'],
-            status=ProblemStatus(int(row['Status'])),
-            problem_link=row['ProblemLink'],
-            submissions_link=row['SubmissionsLink'],
-            filename_language_dict=filename_language_dict
-        )
-
     @property
     def login_payload(self) -> Dict:
         return {
@@ -184,9 +169,6 @@ class KattisToGithub:
                 submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
                 programming_language = tr.find('td', attrs={'data-type': 'lang'}).text
                 yield submission_link, programming_language
-
-    def _get_used_programming_languages(self, solved_problem_html):
-        return [td.text for td in solved_problem_html.find_all('td', attrs={'data-type': 'lang'})]
 
     def _get_submission_html(self, html: Soup) -> Generator[Soup, None, None]:
         for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
