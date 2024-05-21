@@ -7,6 +7,12 @@ from src.solved_problem import SolvedProblem, ProblemStatus
 
 
 class CsvHandler:
+    """
+    CsvHandler is used to read and write SolvedProblems to and from status.csv
+
+    Parameters:
+    - directory: A Path object pointing to the location where status.csv file should be created.
+    """
     def __init__(self, directory: Path) -> None:
         self.__filepath = directory / 'status.csv'
 
@@ -15,6 +21,12 @@ class CsvHandler:
         return self.__filepath
 
     def load_solved_problems(self) -> List[SolvedProblem]:
+        """
+        Loads SolvedProblems from <directory>/status.csv
+
+        Returns:
+        - List[SolvedProblems]: SolvedProblems read from the csv file
+        """
         if not os.path.exists(self.__filepath):
             return []
         solved_problems = []
@@ -56,6 +68,12 @@ class CsvHandler:
         raise ValueError('None value in csv')
 
     def write_solved_problems_to_csv(self, solved_problems: List[SolvedProblem]) -> None:
+        """
+        Writes a given list of SolvedProblems into <directory>/status.csv
+
+        Parameters:
+        - solved_problems: A list of SolvedProblems
+        """
         with open(self.__filepath, 'w', newline='') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELD_NAMES)
             writer.writeheader()
