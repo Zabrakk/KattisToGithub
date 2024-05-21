@@ -155,7 +155,7 @@ class KattisToGithub:
                     submission_html = self._get_html(link)
                     self._parse_submission(solved_problem, submission_html, language)
                 else:
-                    print(f'{language} solution already found for {solved_problem.name}')
+                    pass
             i += 1
             if i > 10:
                 break
@@ -195,18 +195,23 @@ class KattisToGithub:
         solved_problem.status = ProblemStatus.CODE_FOUND
         solved_problem.write_to_file(self.directory)
 
-    def git_commit_solutions(self) -> None:
+    def git_add_and_commit_solutions(self) -> None:
+        """
+        Calls git add on SolvedProblems for which new code was found.
+        If there are at most 5 SolvedProblems to commit, each problem gets its own commit message, otherwise only one commit is made.
+
+        Returns:
+        - None
+        """
         solutions_to_commit = [solved_problem for solved_problem in self.solved_problems if len(solved_problem.filename_code_dict) > 0]
-        if len(solutions_to_commit) > 5:
-            for solved_problem in solutions_to_commit:
-                for filename in solved_problem.filename_code_dict:
-                    self.__git_add(f'Solutions/{filename}')
-            self.__git_commit('Added new solutions')
-        else:
-            for solved_problem in solutions_to_commit:
-                for filename in solved_problem.filename_code_dict:
-                    self.__git_add(f'Solutions/{filename}')
+        should_commit_one_by_one = len(solutions_to_commit) < 6
+        for solved_problem in solutions_to_commit:
+            for filename in solved_problem.filename_code_dict:
+                self.__git_add(f'Solutions/{filename}')
+                if should_commit_one_by_one:
                     self.__git_commit(f'Solution for {solved_problem.name}')
+        if not should_commit_one_by_one:
+            self.__git_commit('Added new solutions')
 
     def __git_add(self, filename: str) -> None:
         print(['git', 'add', filename])
@@ -248,6 +253,6 @@ if __name__ == '__main__':
     if KTG.login():
         KTG.get_solved_problems()
         KTG.get_codes_for_solved_problems()
-        KTG.git_commit_solutions()
+        KTG.git_add_and_commit_solutions()
         KTG.create_markdown_table()
         KTG.update_status_to_csv()
