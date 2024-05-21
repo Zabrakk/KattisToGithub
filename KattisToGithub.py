@@ -177,19 +177,23 @@ class KattisToGithub:
                 yield self._get_html(submission_link)
 
     def _parse_submission(self, solved_problem: SolvedProblem, html: Soup, language: str) -> None:
-        filename = html.find('span', attrs={'class': 'mt-2'}).code.text
+        filename = html.find('div', attrs={'class': 'file_source-content-test'})['data-filename']
         if filename in solved_problem.filename_code_dict:
-            print(f'#: Not getting older solution for {filename}')
             return
         code = html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
-        if language == 'Python 3' and 'def main():' in code:
-            print(f'#: Getting code for {solved_problem.name}')
-            solved_problem.filename_code_dict[filename] = code
-            solved_problem.filename_language_dict[filename] = language
-            solved_problem.status = ProblemStatus.CODE_FOUND
-            solved_problem.write_to_file(self.directory)
-        else:
-            solved_problem.status = ProblemStatus.CODE_NOT_FOUND
+        if language == 'Python 3' and not self._python_3_code_is_acceptable(code):
+            return
+        self._add_submission_contents_to_solved_problem(solved_problem, filename, code, language)
+
+    def _python_3_code_is_acceptable(self, code: str) -> bool:
+        return 'def main()' in code
+
+    def _add_submission_contents_to_solved_problem(self, solved_problem: SolvedProblem, filename: str, code: str, lang: str) -> None:
+        print(f'#: Loading code for {filename}')
+        solved_problem.filename_code_dict[filename] = code
+        solved_problem.filename_language_dict[filename] = lang
+        solved_problem.status = ProblemStatus.CODE_FOUND
+        solved_problem.write_to_file(self.directory)
 
     def git_commit_solutions(self) -> None:
         solutions_to_commit = [solved_problem for solved_problem in self.solved_problems if len(solved_problem.filename_code_dict) > 0]
