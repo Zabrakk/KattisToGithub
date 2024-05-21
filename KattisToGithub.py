@@ -196,18 +196,21 @@ class KattisToGithub:
         if len(solutions_to_commit) > 5:
             for solved_problem in solutions_to_commit:
                 for filename in solved_problem.filename_code_dict:
-                    print(['git', 'add', f'{filename}'])
-            print(['git', 'commit', f'-m Added new solutions'])
+                    self.__git_add(f'Solutions/{filename}')
+            self.__git_commit('Added new solutions')
         else:
             for solved_problem in solutions_to_commit:
                 for filename in solved_problem.filename_code_dict:
-                    self.__git_add_and_commit(self.directory, filename, f'Solution for {solved_problem.name}')
+                    self.__git_add(f'Solutions/{filename}')
+                    self.__git_commit(f'Solution for {solved_problem.name}')
 
-    def __git_add_and_commit(self, directory: Path, filename: str, message: str) -> None:
-        print(['git', 'add', f'Solutions/{filename}'])
+    def __git_add(self, filename: str) -> None:
+        print(['git', 'add', filename])
+        #subprocess.Popen(['git', 'add', filename], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
+
+    def __git_commit(self, message: str) -> None:
         print(['git', 'commit', f'-m {message}'])
-        #subprocess.Popen(['git', 'add', f'Solutions/{filename}'], cwd=directory, stdout=subprocess.DEVNULL).wait()
-        #subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=directory, stdout=subprocess.DEVNULL).wait()
+        #subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
         """
@@ -219,7 +222,8 @@ class KattisToGithub:
         md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
         md_list.create()
         if md_list.should_add_and_commit:
-            self.__git_add_and_commit(self.directory, 'README.md', 'Updated README.md')
+            self.__git_add(md_list.filename)
+            self.__git_commit('Updated README.md')
 
     def update_status_to_csv(self) -> None:
         """
