@@ -50,7 +50,7 @@ class MarkdownList:
         - None
         """
         if os.path.exists(self.__filepath):
-            with open(self.__filepath, 'r') as md_file:
+            with open(self.__filepath, 'r', encoding='utf-8') as md_file:
                 self.__original_contents = md_file.readlines()
         else:
             self.__original_contents = []
@@ -101,7 +101,7 @@ class MarkdownList:
         Returns:
         - None
         """
-        with open(self.__filepath, 'w') as md_file:
+        with open(self.__filepath, 'w', encoding='utf-8') as md_file:
             md_file.writelines(contents)
 
     def create(self) -> None:
