@@ -243,7 +243,11 @@ class KattisToGithub:
         - None
         """
         self.solved_problems.sort(key=lambda sp: sp.name)
-        CsvHandler(self.directory).write_solved_problems_to_csv(self.solved_problems)
+        csv_handler = CsvHandler(self.directory)
+        csv_handler.write_solved_problems_to_csv(self.solved_problems)
+        if csv_handler.add_to_gitignore():
+            self.__git_add('status.csv')
+            self.__git_commit('Updated .gitignore')
 
 
 if __name__ == '__main__':
