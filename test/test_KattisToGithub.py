@@ -3,8 +3,10 @@ import csv
 from pathlib import Path
 from typing import List
 import unittest
+import subprocess
 from unittest import TestCase, mock
 from src.constants import *
+from src.solved_problem import SolvedProblem
 from KattisToGithub import KattisToGithub
 
 CSRF_TOKEN = '12345'
@@ -159,7 +161,53 @@ class TestKattisToGithub(TestCase):
         assert sp.points == '3.0'
         assert sp.difficulty == 'Medium'
 
-    @unittest.skipIf(TEST_CREDENTIALS is None, reason='No test credentials given')
-    def test_fail(self):
-        print(TEST_CREDENTIALS)
-        assert True
+    def _mock_Popen(self, *args, **kwargs):
+        print(args, kwargs)
+
+    class MockSubprocess:
+        def __init__(self, path: Path):
+            self.ctr = 0
+            self.path = path
+
+        def Popen(self, *args, **kwargs):
+            args = args[0]
+            assert Path(kwargs['cwd']) == self.path
+            assert kwargs['stdout'] == subprocess.DEVNULL
+            if args[1] == 'add':
+                assert args[2] == 'Solutions/test.py'
+                self.ctr += 1
+            elif args[1] == 'commit' and self.ctr > 5:
+                assert args[2] == '-m Added new solutions'
+            elif args[1] == 'commit':
+                assert args[2] == '-m Solution for TestSP'
+            return self.MockWait()
+
+        class MockWait:
+            def wait(self):
+                pass
+
+    def test_git_add_and_commit_solution_5_solutions(self):
+        self.KTG.solved_problems = [SolvedProblem(
+            name='TestSP', filename_code_dict={'test.py': 'print("Hello")'}
+        )] * 5
+        mp = self.MockSubprocess(self.KTG.directory)
+        with mock.patch('subprocess.Popen', mp.Popen):
+            self.KTG.git_add_and_commit_solutions()
+
+    def test_git_add_and_commit_solution_mote_than_5_solutions(self):
+        self.KTG.solved_problems = [SolvedProblem(
+            name='TestSP', filename_code_dict={'test.py': 'print("Hello")'}
+        )] * 6
+        mp = self.MockSubprocess(self.KTG.directory)
+        with mock.patch('subprocess.Popen', mp.Popen):
+            self.KTG.git_add_and_commit_solutions()
+
+    def test_git_add_and_commit_solution_no_git(self):
+        self.KTG.no_git = True
+        self.KTG.solved_problems = [SolvedProblem(
+            name='TestSP', filename_code_dict={'test.py': 'print("Hello")'}
+        )] * 5
+        mp = self.MockSubprocess(self.KTG.directory)
+        with mock.patch('subprocess.Popen', mp.Popen):
+            self.KTG.git_add_and_commit_solutions()
+        assert mp.ctr == 0
