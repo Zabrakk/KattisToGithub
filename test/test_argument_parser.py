@@ -6,10 +6,12 @@ def test_parse_short_arguments():
     assert parser.user == 'my_username'
     assert parser.password == 'my_password'
     assert parser.directory == '../../Solutions'
+    assert parser.no_git is False
 
 
 def test_long_arguments():
-    parser = parse_arguments(['--user', 'my_username', '--password', 'my_password', '--directory', '../../Solutions'])
+    parser = parse_arguments(['--user', 'my_username', '--password', 'my_password', '--directory', '../../Solutions', '--no-git'])
     assert parser.user == 'my_username'
     assert parser.password == 'my_password'
     assert parser.directory == '../../Solutions'
+    assert parser.no_git is True
