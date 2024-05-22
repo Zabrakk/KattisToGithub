@@ -29,6 +29,7 @@ class KattisToGithub:
         self.user = parser.user
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
+        self.no_git = parser.no_git
 
     def create_folders_for_solutions(self) -> None:
         """
@@ -214,12 +215,12 @@ class KattisToGithub:
             self.__git_commit('Added new solutions')
 
     def __git_add(self, filename: str) -> None:
-        print(['git', 'add', filename])
-        #subprocess.Popen(['git', 'add', filename], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
+        if not self.no_git:
+            subprocess.Popen(['git', 'add', filename], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
 
     def __git_commit(self, message: str) -> None:
-        print(['git', 'commit', f'-m {message}'])
-        #subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
+        if not self.no_git:
+            subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
         """
