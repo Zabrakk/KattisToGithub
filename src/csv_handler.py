@@ -16,6 +16,27 @@ class CsvHandler:
     def __init__(self, directory: Path) -> None:
         self.__filepath = directory / 'status.csv'
 
+    def add_to_gitignore(self) -> bool:
+        """
+        Adds status.csv to .gitignore. If .gitignore does not exists, it will be created.
+
+        Returns:
+        - bool: True if .gitignore was updated; False otherwise
+        """
+        gitignore_filepath = self.__filepath.parent / '.gitignore'
+        if not gitignore_filepath.exists():
+            with open(gitignore_filepath, 'w') as file:
+                print('#: Adding status.csv to .gitignore')
+                file.write('status.csv\n')
+                return True
+        with open(gitignore_filepath, 'r+') as file:
+            ignored_files = list(map(str.strip, file.readlines()))
+            if 'status.csv' in ignored_files or '*.csv' in ignored_files:
+                return False
+            print('#: Adding status.csv to .gitignore')
+            file.write('\nstatus.csv\n')
+        return True
+
     def load_solved_problems(self) -> List[SolvedProblem]:
         """
         Loads SolvedProblems from <directory>/status.csv

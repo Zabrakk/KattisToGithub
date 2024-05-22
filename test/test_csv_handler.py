@@ -9,17 +9,41 @@ from src.constants import CSV_FIELD_NAMES
 from constants import SOLVED_PROBLEMS, TEST_DIR
 
 TEST_FILE = TEST_DIR + '/status.csv'
+TEST_GITIGNORE = TEST_DIR + '/.gitignore'
 
 
 class TestCsvHandler(TestCase):
     def setUp(self) -> None:
         self.csv_hadler = CsvHandler(directory=Path(TEST_DIR))
         return super().setUp()
-    
+
     def tearDown(self) -> None:
         if os.path.exists(TEST_FILE):
             os.remove(TEST_FILE)
+        if os.path.exists(TEST_GITIGNORE):
+            os.remove(TEST_GITIGNORE)
         return super().tearDown()
+
+    def test_add_to_gitignore_does_not_exist(self):
+        assert self.csv_hadler.add_to_gitignore() is True
+        with open(TEST_GITIGNORE, 'r') as ignore_file:
+            assert ignore_file.read() == 'status.csv\n'
+
+    def test_add_to_gitignore_already_exists(self):
+        with open(TEST_GITIGNORE, 'w') as ignore_file:
+            ignore_file.writelines(['test.txt\n', 'test.csv'])
+        assert self.csv_hadler.add_to_gitignore() is True
+        with open(TEST_GITIGNORE, 'r') as ignore_file:
+            assert ignore_file.readlines() == [
+                'test.txt\n', 'test.csv\n', 'status.csv\n'
+            ]
+
+    def test_add_to_gitignore_no_update(self):
+        with open(TEST_GITIGNORE, 'w') as ignore_file:
+            ignore_file.writelines(['status.csv\n', '*.txt'])
+        assert self.csv_hadler.add_to_gitignore() is False
+        with open(TEST_GITIGNORE, 'r') as ignore_file:
+            assert ignore_file.readlines() == ['status.csv\n', '*.txt']
 
     def test_load_solved_problems_no_csv_file(self):
         assert self.csv_hadler.load_solved_problems() == []
