@@ -159,21 +159,20 @@ class KattisToGithub:
         print('#: Starting to fetch codes for solved problems')
         i = 0
         for solved_problem in self.solved_problems:
-            if not self._should_look_for_code(solved_problem):
-                continue
-            solved_problem_html = self._get_html(solved_problem.submissions_link)
-            for link, language in self._get_submission_link_and_language(solved_problem_html):
-                if language not in solved_problem.filename_language_dict.values():
-                    submission_html = self._get_html(link)
-                    self._parse_submission(solved_problem, submission_html, language)
-                else:
-                    pass
+            if self._should_look_for_code(solved_problem):
+                solved_problem_html = self._get_html(solved_problem.submissions_link)
+                for link, language in self._get_submission_link_and_language(solved_problem_html):
+                    if language not in solved_problem.filename_language_dict.values():
+                        submission_html = self._get_html(link)
+                        self._parse_submission(solved_problem, submission_html, language)
+                    else:
+                        pass
             i += 1
             if i > 10:
                 break
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
-        return solved_problem.status != 1
+        return solved_problem.status != ProblemStatus.CODE_FOUND
 
     def _get_submission_link_and_language(self, html: Soup) -> Generator[Soup, str, None]:
         for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
