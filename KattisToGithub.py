@@ -105,12 +105,23 @@ class KattisToGithub:
         for page in pages:
             print(f'#: Collecting solved problems from {self._solved_problems_url + page}')
             html = self._get_html(self._solved_problems_url + page)
-            for tr in html.find('div', attrs={'id': 'problems-tab'}).find('tbody').find_all('tr'):
-                sp = self._parse_solved_problem(tr)
+            for sp_html in self._find_solved_problems_from_html(html):
+                sp = self._parse_solved_problem(sp_html)
                 if sp.submissions_link not in self._solved_problem_links:
                     self.solved_problems += [sp]
             self._get_links_to_next_pages(html, pages)
         print(f'#: Found a total of {len(self.solved_problems)} solved problems')
+
+    def _find_solved_problems_from_html(self, html: Soup) -> List[Soup]:
+        """
+        Extracts entries from the 'problems-tab' of the user's page.
+
+        Returns:
+        - List[Soup]: List of table elements containing info on solved problems
+        """
+        return [solved_problem_html for solved_problem_html in \
+            html.find('div', attrs={'id': 'problems-tab'}).find('tbody').find_all('tr')
+        ]
 
     def _get_links_to_next_pages(self, html: Soup, pages: List[str]) -> None:
         """
