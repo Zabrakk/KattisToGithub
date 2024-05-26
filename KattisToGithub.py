@@ -189,6 +189,9 @@ class KattisToGithub:
                 yield self._get_html(submission_link)
 
     def _parse_submission(self, solved_problem: SolvedProblem, html: Soup, language: str) -> None:
+        if len(html.find_all('div', attrs={'class': 'horizontal_link_list'})) > 0:
+            print(f'#: CAN\'T DOWNLOAD SUBMISSION FOR {solved_problem.name} BECAUSE THERE IS MORE THAN ONE FILE PRESENT')
+            return
         filename = html.find('div', attrs={'class': 'file_source-content-test'})['data-filename']
         if filename in solved_problem.filename_code_dict:
             return
