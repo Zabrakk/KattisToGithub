@@ -80,6 +80,8 @@ class TestKattisToGithub(TestCase):
         assert self.KTG.user == USER
         assert self.KTG.password == PASSWORD
         assert self.KTG.directory == Path(__file__).parent
+        assert self.KTG.no_git is False
+        assert self.KTG.py_main_only is False
 
     def test_create_folders_for_solutions(self):
         self.KTG.create_folders_for_solutions()

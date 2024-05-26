@@ -30,6 +30,7 @@ class KattisToGithub:
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
         self.no_git = parser.no_git
+        self.py_main_only = parser.py_main_only
 
     def create_folders_for_solutions(self) -> None:
         """
@@ -192,7 +193,7 @@ class KattisToGithub:
         if filename in solved_problem.filename_code_dict:
             return
         code = html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
-        if language == 'Python 3' and not self._python_3_code_is_acceptable(code):
+        if language == 'Python 3' and self.py_main_only and not self._python_3_code_is_acceptable(code):
             return
         self._add_submission_contents_to_solved_problem(solved_problem, filename, code, language)
 
