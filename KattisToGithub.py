@@ -161,6 +161,7 @@ class KattisToGithub:
         i = 0
         for solved_problem in self.solved_problems:
             if self._should_look_for_code(solved_problem):
+                print(solved_problem.submissions_link)
                 solved_problem_html = self._get_html(solved_problem.submissions_link)
                 for link, language in self._get_submission_link_and_language(solved_problem_html):
                     if language not in solved_problem.filename_language_dict.values():
@@ -175,35 +176,32 @@ class KattisToGithub:
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
         return solved_problem.status != ProblemStatus.CODE_FOUND
 
-    def _get_submission_link_and_language(self, html: Soup) -> Generator[Soup, str, None]:
+    def _get_submission_link_and_language(self, html: Soup) -> Generator[str, str, None]:
         for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
             if tr.find('div', {'class': 'status is-status-accepted'}):
-                submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
+                submission_link = self.base_url + tr.find('td', attrs={'data-type': 'actions'}).find('a', href=True).attrs['href']
                 programming_language = tr.find('td', attrs={'data-type': 'lang'}).text
                 yield submission_link, programming_language
 
-    def _get_submission_html(self, html: Soup) -> Generator[Soup, None, None]:
-        for tr in html.find('div', attrs={'id': 'submissions-tab'}).find('tbody').find_all('tr'):
-            if tr.find('div', {'class': 'status is-status-accepted'}):
-                submission_link = self.base_url + tr.contents[-1].find('a', href=True).attrs['href']
-                yield self._get_html(submission_link)
-
-    def _parse_submission(self, solved_problem: SolvedProblem, html: Soup, language: str) -> None:
+    def _parse_submission(self, solved_problem: SolvedProblem, html: Soup, language: str) -> bool:
         if len(html.find_all('div', attrs={'class': 'horizontal_link_list'})) > 0:
             print(f'#: CAN\'T DOWNLOAD SUBMISSION FOR {solved_problem.name} BECAUSE THERE IS MORE THAN ONE FILE PRESENT')
-            return
+            return False
         filename = html.find('div', attrs={'class': 'file_source-content-test'})['data-filename']
         if filename in solved_problem.filename_code_dict:
-            return
+            return False
         code = html.find(name='div', attrs={'class': 'source-highlight w-full'}).text
-        if language == 'Python 3' and self.py_main_only and not self._python_3_code_is_acceptable(code):
-            return
-        self._add_submission_contents_to_solved_problem(solved_problem, filename, code, language)
+        if language == 'Python 3' and not self._python_3_code_is_acceptable(code):
+            return False
+        self.__add_submission_contents_to_solved_problem(solved_problem, filename, code, language)
+        return True
 
     def _python_3_code_is_acceptable(self, code: str) -> bool:
-        return 'def main()' in code
+        if self.py_main_only:
+            return 'def main()' in code
+        return True
 
-    def _add_submission_contents_to_solved_problem(self, solved_problem: SolvedProblem, filename: str, code: str, lang: str) -> None:
+    def __add_submission_contents_to_solved_problem(self, solved_problem: SolvedProblem, filename: str, code: str, lang: str) -> None:
         print(f'#: Loading code for {filename}')
         solved_problem.filename_code_dict[filename] = code
         solved_problem.filename_language_dict[filename] = lang
@@ -259,7 +257,7 @@ class KattisToGithub:
         self.solved_problems.sort(key=lambda sp: sp.name)
         csv_handler = CsvHandler(self.directory)
         csv_handler.write_solved_problems_to_csv(self.solved_problems)
-        if csv_handler.add_to_gitignore():
+        if csv_handler.should_add_to_gitignore:
             self.__git_add('status.csv')
             self.__git_commit('Updated .gitignore')
 

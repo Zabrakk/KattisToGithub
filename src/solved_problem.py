@@ -22,7 +22,6 @@ class SolvedProblem:
     filename_language_dict: Dict[str, str] = field(default_factory=dict)
 
     def write_to_file(self, directory: Path) -> None:
-        # TODO: Expand to write multiple files if different languages found
         for filename in self.filename_code_dict:
             with open(directory / 'Solutions' / filename, 'w') as file:
                 file.write(self.filename_code_dict[filename])

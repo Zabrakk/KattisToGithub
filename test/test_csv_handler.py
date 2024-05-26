@@ -25,14 +25,14 @@ class TestCsvHandler(TestCase):
         return super().tearDown()
 
     def test_add_to_gitignore_does_not_exist(self):
-        assert self.csv_hadler.add_to_gitignore() is True
+        assert self.csv_hadler.should_add_to_gitignore is True
         with open(TEST_GITIGNORE, 'r') as ignore_file:
             assert ignore_file.read() == 'status.csv\n'
 
     def test_add_to_gitignore_already_exists(self):
         with open(TEST_GITIGNORE, 'w') as ignore_file:
             ignore_file.writelines(['test.txt\n', 'test.csv'])
-        assert self.csv_hadler.add_to_gitignore() is True
+        assert self.csv_hadler.should_add_to_gitignore is True
         with open(TEST_GITIGNORE, 'r') as ignore_file:
             assert ignore_file.readlines() == [
                 'test.txt\n', 'test.csv\n', 'status.csv\n'
@@ -41,7 +41,7 @@ class TestCsvHandler(TestCase):
     def test_add_to_gitignore_no_update(self):
         with open(TEST_GITIGNORE, 'w') as ignore_file:
             ignore_file.writelines(['status.csv\n', '*.txt'])
-        assert self.csv_hadler.add_to_gitignore() is False
+        assert self.csv_hadler.should_add_to_gitignore is False
         with open(TEST_GITIGNORE, 'r') as ignore_file:
             assert ignore_file.readlines() == ['status.csv\n', '*.txt']
 

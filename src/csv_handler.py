@@ -16,7 +16,8 @@ class CsvHandler:
     def __init__(self, directory: Path) -> None:
         self.__filepath = directory / 'status.csv'
 
-    def add_to_gitignore(self) -> bool:
+    @property
+    def should_add_to_gitignore(self) -> bool:
         """
         Adds status.csv to .gitignore. If .gitignore does not exists, it will be created.
 
