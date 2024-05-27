@@ -19,6 +19,7 @@ class KattisToGithub:
         self.base_url = BASE_URL
         self.login_url = LOGIN_URL
         self.solved_problems: List[SolvedProblem] = []
+        self.user_should_git_push = False
 
     def get_run_details_from_sys_argv(self) -> None:
         """
@@ -237,6 +238,7 @@ class KattisToGithub:
 
     def __git_commit(self, message: str) -> None:
         if not self.no_git:
+            self.user_should_git_push = True
             subprocess.Popen(['git', 'commit', f'-m {message}'], cwd=self.directory, stdout=subprocess.DEVNULL).wait()
 
     def create_markdown_table(self):
@@ -268,6 +270,10 @@ class KattisToGithub:
             self.__git_add('status.csv')
             self.__git_commit('Updated .gitignore')
 
+    def git_push_info_print(self):
+        if self.user_should_git_push:
+            print('#: Please use the command "git push" to push commited changes to your repository!')
+
 
 if __name__ == '__main__':
     KTG = KattisToGithub()
@@ -280,3 +286,4 @@ if __name__ == '__main__':
         KTG.git_add_and_commit_solutions()
         KTG.create_markdown_table()
         KTG.update_status_to_csv()
+        KTG.git_push_info_print()

@@ -272,6 +272,7 @@ class TestKattisToGithub(TestCase):
         ms = MockSubprocess(self.KTG.directory)
         with mock.patch('subprocess.Popen', ms.Popen):
             self.KTG.git_add_and_commit_solutions()
+        assert self.KTG.user_should_git_push is True
 
     def test_git_add_and_commit_solution_mote_than_5_solutions(self):
         self.KTG.solved_problems = [SolvedProblem(
