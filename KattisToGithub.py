@@ -205,7 +205,7 @@ class KattisToGithub:
         return True
 
     def __add_submission_contents_to_solved_problem(self, solved_problem: SolvedProblem, filename: str, code: str, lang: str) -> None:
-        print(f'#: Loading code for {filename}')
+        print(f'#: Downloading code for {filename}')
         solved_problem.filename_code_dict[filename] = code
         solved_problem.filename_language_dict[filename] = lang
         solved_problem.status = ProblemStatus.CODE_FOUND
@@ -220,6 +220,8 @@ class KattisToGithub:
         - None
         """
         solutions_to_commit = [solved_problem for solved_problem in self.solved_problems if len(solved_problem.filename_code_dict) > 0]
+        if len(solutions_to_commit) > 0:
+            print('#: Calling git add and commit on downloaded solutions')
         should_commit_one_by_one = len(solutions_to_commit) < 6
         for solved_problem in solutions_to_commit:
             for filename in solved_problem.filename_code_dict:
@@ -262,6 +264,7 @@ class KattisToGithub:
         csv_handler = CsvHandler(self.directory)
         csv_handler.write_solved_problems_to_csv(self.solved_problems)
         if csv_handler.should_add_to_gitignore:
+            print('#: Calling git add and commit on .gitignore')
             self.__git_add('status.csv')
             self.__git_commit('Updated .gitignore')
 
