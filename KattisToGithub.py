@@ -239,6 +239,7 @@ class KattisToGithub:
         md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
         md_list.create()
         if md_list.should_add_and_commit:
+            print('#: Calling git add & commit on README.md')
             self.__git_add(md_list.filename)
             self.__git_commit('Updated README.md')
 
