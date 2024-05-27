@@ -158,6 +158,7 @@ class KattisToGithub:
 
     def get_codes_for_solved_problems(self) -> None:
         print('#: Starting to fetch codes for solved problems')
+        ctr = 0
         for solved_problem in self.solved_problems:
             if self._should_look_for_code(solved_problem):
                 solved_problem_html = self._get_html(solved_problem.submissions_link)
@@ -167,6 +168,9 @@ class KattisToGithub:
                         self._parse_submission(solved_problem, submission_html, language)
                     else:
                         pass
+            ctr += 1
+            if ctr > 0 and ctr % 100 == 0:
+                print(f'#: Checked {ctr} solved problems...')
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
         return solved_problem.status != ProblemStatus.CODE_FOUND
