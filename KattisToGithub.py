@@ -159,18 +159,22 @@ class KattisToGithub:
     def get_codes_for_solved_problems(self) -> None:
         print('#: Starting to fetch codes for solved problems')
         ctr = 0
-        for solved_problem in self.solved_problems:
-            if self._should_look_for_code(solved_problem):
-                solved_problem_html = self._get_html(solved_problem.submissions_link)
-                for link, language in self._get_submission_link_and_language(solved_problem_html):
-                    if language not in solved_problem.filename_language_dict.values():
-                        submission_html = self._get_html(link)
-                        self._parse_submission(solved_problem, submission_html, language)
-                    else:
-                        pass
-            ctr += 1
-            if ctr > 0 and ctr % 59 == 0:
-                print(f'#: Checked {ctr} solved problems...')
+        try:
+            for solved_problem in self.solved_problems:
+                if self._should_look_for_code(solved_problem):
+                    solved_problem_html = self._get_html(solved_problem.submissions_link)
+                    for link, language in self._get_submission_link_and_language(solved_problem_html):
+                        if language not in solved_problem.filename_language_dict.values():
+                            submission_html = self._get_html(link)
+                            self._parse_submission(solved_problem, submission_html, language)
+                        else:
+                            pass
+                ctr += 1
+                if ctr > 0 and ctr % 59 == 0:
+                    print(f'#: Checked {ctr} solved problems...')
+        except KeyboardInterrupt:
+            print('#: Downloading solutions was interrupted by user')
+            print('#: Performing final steps before shutdown...')
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
         return solved_problem.status != ProblemStatus.CODE_FOUND
