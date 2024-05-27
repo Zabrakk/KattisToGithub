@@ -95,7 +95,7 @@ class MarkdownList:
         ]
 
     def __create_solutions_tab_content_for_solved_problem(self, solved_problem: SolvedProblem) -> str:
-        return ' '.join([f'[{language}](Solutions/{filename})' for filename, language in solved_problem.filename_language_dict.items()])
+        return ', '.join([f'[{language}](Solutions/{filename})' for filename, language in solved_problem.filename_language_dict.items()])
 
     def _save_contents_to_README(self, contents: List[str]) -> None:
         """

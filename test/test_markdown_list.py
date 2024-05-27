@@ -78,7 +78,7 @@ class TestMarkdownList(TestCase):
             assert entry == expected_result
 
     def __create_problem_list_entry(self, i: int) -> str:
-        return ' '.join([f'[{language}](Solutions/{filename})' for filename, language in SOLVED_PROBLEMS[i].filename_language_dict.items()])
+        return ', '.join([f'[{language}](Solutions/{filename})' for filename, language in SOLVED_PROBLEMS[i].filename_language_dict.items()])
 
     def test_save_contents_to_README(self):
         contents_to_save = README_LIST_START(0) + ['|1|2|3|\n']
