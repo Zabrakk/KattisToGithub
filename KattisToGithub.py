@@ -169,7 +169,7 @@ class KattisToGithub:
                     else:
                         pass
             ctr += 1
-            if ctr > 0 and ctr % 100 == 0:
+            if ctr > 0 and ctr % 59 == 0:
                 print(f'#: Checked {ctr} solved problems...')
 
     def _should_look_for_code(self, solved_problem: SolvedProblem) -> bool:
