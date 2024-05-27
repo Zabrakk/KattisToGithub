@@ -3,12 +3,12 @@ from typing import List
 from pathlib import Path
 from copy import deepcopy
 from unittest import TestCase
-from src.constants import README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING
+from src.constants import *
 from src.markdown_list import MarkdownList
 from constants import SOLVED_PROBLEMS, TEST_DIR
 
 TEST_FILE = TEST_DIR + '/README.md'
-README_LIST_START = [README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
+README_LIST_START = lambda n: [README_LIST_TITLE, KTG_AD, SEPARATOR, README_NUM_SOLVED(n), README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
 
 
 class TestMarkdownList(TestCase):
@@ -32,13 +32,13 @@ class TestMarkdownList(TestCase):
     def test_load_existing_README_contents_no_README(self):
         self.md_list._load_existing_README_contents()
         assert self.md_list.original_contents == []
-        assert self.md_list.new_contents == ['\n'] + README_LIST_START
+        assert self.md_list.new_contents == ['\n'] + README_LIST_START(3)
 
     def test_load_existing_README_contents_no_contents(self):
         self.__write_to_README([])
         self.md_list._load_existing_README_contents()
         assert self.md_list.original_contents == []
-        assert self.md_list.new_contents == ['\n'] + README_LIST_START
+        assert self.md_list.new_contents == ['\n'] + README_LIST_START(3)
 
     def test_load_existing_README_contents_README_has_content(self):
         original_contents = [
@@ -48,7 +48,7 @@ class TestMarkdownList(TestCase):
         self.__write_to_README(original_contents)
         self.md_list._load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents + ['\n'] + README_LIST_START
+        assert self.md_list.new_contents == original_contents + ['\n'] + README_LIST_START(3)
 
     def test_load_existing_README_contents_README_already_has_list(self):
         original_contents = [
@@ -61,7 +61,7 @@ class TestMarkdownList(TestCase):
         self.__write_to_README(original_contents)
         self.md_list._load_existing_README_contents()
         assert self.md_list.original_contents == original_contents
-        assert self.md_list.new_contents == original_contents[:2] + README_LIST_START
+        assert self.md_list.new_contents == original_contents[:2] + README_LIST_START(3)
 
     def test_sort_solved_problems_by_difficulty(self):
         expected_result = ['Hard', 'Medium', 'Easy', 'Easy']
@@ -81,14 +81,14 @@ class TestMarkdownList(TestCase):
         return ' '.join([f'[{language}](Solutions/{filename})' for filename, language in SOLVED_PROBLEMS[i].filename_language_dict.items()])
 
     def test_save_contents_to_README(self):
-        contents_to_save = README_LIST_START + ['|1|2|3|\n']
+        contents_to_save = README_LIST_START(0) + ['|1|2|3|\n']
         self.md_list._save_contents_to_README(contents_to_save)
         self.__read_README() == contents_to_save
 
     def test_create(self):
         self.__write_to_README(['# KATTIS SOLUTIONS\n', 'My solutions.'])
         self.md_list.create()
-        assert self.__read_README() == ['# KATTIS SOLUTIONS\n', 'My solutions.\n'] + README_LIST_START + [
+        assert self.__read_README() == ['# KATTIS SOLUTIONS\n', 'My solutions.\n'] + README_LIST_START(3) + [
             f'|[{SOLVED_PROBLEMS[2].name}]({SOLVED_PROBLEMS[2].problem_link})|{SOLVED_PROBLEMS[2].difficulty}|' + self.__create_problem_list_entry(2) + '\n',
             f'|[{SOLVED_PROBLEMS[0].name}]({SOLVED_PROBLEMS[0].problem_link})|{SOLVED_PROBLEMS[0].difficulty}|' + self.__create_problem_list_entry(0) + '\n',
             f'|[{SOLVED_PROBLEMS[1].name}]({SOLVED_PROBLEMS[1].problem_link})|{SOLVED_PROBLEMS[1].difficulty}|' + self.__create_problem_list_entry(1) + '\n'

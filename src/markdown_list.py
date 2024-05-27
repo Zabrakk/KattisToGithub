@@ -2,7 +2,7 @@ import os
 from typing import List
 from pathlib import Path
 from copy import deepcopy
-from src.constants import README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING
+from src.constants import *
 from src.solved_problem import SolvedProblem, ProblemStatus
 
 
@@ -17,6 +17,7 @@ class MarkdownList:
     def __init__(self, directory: Path, solved_problems: List[SolvedProblem]) -> None:
         self.__filepath = directory / 'README.md'
         self.__solved_problems = deepcopy(solved_problems)
+        self.__trim_solved_problems()
 
     @property
     def solved_problems(self) -> List[SolvedProblem]:
@@ -41,6 +42,11 @@ class MarkdownList:
     def filename(self) -> Path:
         return 'README.md'
 
+    def __trim_solved_problems(self):
+        self.__solved_problems = [
+            sp for sp in self.__solved_problems if sp.status != ProblemStatus.CODE_NOT_FOUND
+        ]
+
     def _load_existing_README_contents(self) -> None:
         """
         Loads the contents of a README.md which might already exist.
@@ -61,7 +67,7 @@ class MarkdownList:
             new_contents = contents[:contents.index(README_LIST_TITLE)]
         except ValueError:
             new_contents = contents + ['\n']
-        new_contents += [README_LIST_TITLE, KTG_AD, README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
+        new_contents += [README_LIST_TITLE, KTG_AD, SEPARATOR, README_NUM_SOLVED(len(self.__solved_problems)), README_LIST_COLUMN_TITLES, README_LIST_POSITIONING]
         return new_contents
 
     def _sort_solved_problems_by_difficulty(self) -> None:
@@ -85,7 +91,7 @@ class MarkdownList:
         """
         return [
             f'|[{sp.name}]({sp.problem_link})|{sp.difficulty}|' + self.__create_solutions_tab_content_for_solved_problem(sp) + '\n' \
-            for sp in self.__solved_problems if sp.status != ProblemStatus.CODE_NOT_FOUND
+            for sp in self.__solved_problems
         ]
 
     def __create_solutions_tab_content_for_solved_problem(self, solved_problem: SolvedProblem) -> str:
