@@ -31,6 +31,7 @@ class KattisToGithub:
         self.password = parser.password
         self.directory = Path(__file__).parent / parser.directory
         self.no_git = parser.no_git
+        self.no_readme = parser.no_readme
         self.py_main_only = parser.py_main_only
 
     def create_folders_for_solutions(self) -> None:
@@ -220,6 +221,8 @@ class KattisToGithub:
         Returns:
         - None
         """
+        if self.no_git:
+            return
         solutions_to_commit = [solved_problem for solved_problem in self.solved_problems if len(solved_problem.filename_code_dict) > 0]
         if len(solutions_to_commit) > 0:
             print('#: Calling git add and commit on downloaded solutions')
@@ -248,12 +251,14 @@ class KattisToGithub:
         Returns:
         - None
         """
-        md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
-        md_list.create()
-        if md_list.should_add_and_commit:
-            print('#: Calling git add & commit on README.md')
-            self.__git_add(md_list.filename)
-            self.__git_commit('Updated README.md')
+        if not self.no_readme:
+            print('#: Adding any updates to README.md')
+            md_list = MarkdownList(directory=self.directory, solved_problems=self.solved_problems)
+            md_list.create()
+            if md_list.should_add_and_commit and not self.no_git:
+                print('#: Calling git add & commit on README.md')
+                self.__git_add(md_list.filename)
+                self.__git_commit('Updated README.md')
 
     def update_status_to_csv(self) -> None:
         """
@@ -265,9 +270,9 @@ class KattisToGithub:
         self.solved_problems.sort(key=lambda sp: sp.name)
         csv_handler = CsvHandler(self.directory)
         csv_handler.write_solved_problems_to_csv(self.solved_problems)
-        if csv_handler.should_add_to_gitignore:
+        if csv_handler.should_add_to_gitignore and not self.no_git:
             print('#: Calling git add and commit on .gitignore')
-            self.__git_add('status.csv')
+            self.__git_add('.gitignore')
             self.__git_commit('Updated .gitignore')
 
     def git_push_info_print(self):
