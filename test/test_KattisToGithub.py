@@ -301,6 +301,14 @@ class TestKattisToGithub(TestCase):
         assert os.path.exists('test/README.md')
         os.remove('test/README.md')
 
+    def test_create_markdown_table_when_no_readme_is_true(self):
+        self.KTG.no_readme = True
+        self.KTG.solved_problems = [
+            SolvedProblem(name='A', problem_link='B', difficulty='Easy', filename_language_dict={'D': 'E'})
+        ]
+        self.KTG.create_markdown_table()
+        assert not os.path.exists('test/README.md')
+
     def test_update_status_to_csv(self):
         self.KTG.no_git = True
         self.KTG.solved_problems = [
