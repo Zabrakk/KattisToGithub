@@ -5,9 +5,8 @@ Here are the basic steps KTG takes to make showing off your solutions and progra
 1. Logs into your [Open.Kattis](https://open.kattis.com/) profile
 2. Fetches the contents of the "Solved problems" tab on your profile
 3. Download's the most recent accepted submission for each problem
-4. Uses _git add_ and _git commit_ on the downloaded files
-5. Creates a list of all solved problems to your repository's README.md
-6. Uses _git add_ and _git commit_ on README.md
+4. Creates a list of all solved problems to your repository's README.md
+5. Uses _git add_ and _git commit_ on the downloaded files and README.md
 
 All you have to do is run KTG and use the command _git push_ once KTG has finished!
 
@@ -56,4 +55,12 @@ kuvaesimerkki ajosta
 **TODO**
 
 ## Running tests
-**TODO**
+You can run the unittests with:
+```bash
+./run_utest.sh
+```
+By default unittests marked with the _@use_test_credentials_ decorator are skipped. These tests actually log into Kattis and fetch details from there. In order to also run the skipped tests, add a file called _test_credentials.txt_ to the test folder. The contents of this file should include your Kattis username and password formatted like this:
+```text
+username
+password
+```
