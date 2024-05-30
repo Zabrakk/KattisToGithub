@@ -29,17 +29,17 @@ pip install -r requirements.txt
 ### Running KattisToGithub for the first time
 At this point KTG can be run. However, **if you don't yet have a repositoy ready, into which the KTG wll download your solutions, go ahead and create one**.
 
-Now, for the sake of givin an example, let's assume that you have a repository named **KattisSolutions**, and this repository is stored locally on your machine in the same parent directory as KTG, like this:
+Now, for the sake of givin an example, let's assume that you have a repository named **KattisSolutions**, and this repository is stored locally on your machine in the same parent directory as KTG like this:
 ```
--home
- |-KattisToGithub
- |-KattisSolutions
+home
+|-KattisToGithub
+|-KattisSolutions
 ```
 To start downloading your Kattis submission into KattisSolutions you can run KTG with the following command:
 ```bash
 python KattisToGithub.py -u <username> -p <password> -d ../KattisSolutions
 ```
-Substitute \<username\> and \<password\> with the details you use with Kattis' "[Log in with e-mail](https://open.kattis.com/login/email?)"
+Substitute \<username\> and \<password\> with the details you use with Kattis' "[Log in with e-mail](https://open.kattis.com/login/email?)".
 
 Depending on how many problems you have solved KTG may take a long or a short time to run. However, once finished remember to _git push_ any commits KTG made. And thats it!
 
@@ -52,7 +52,19 @@ update status.csv
 kuvaesimerkki ajosta
 
 ## Command line arguments
-**TODO**
+KattisToGithub has the following command line arguments:
+```bash
+usage: KattisToGithub.py [-h] -u  -p  -d  [--no-git] [--no-readme] [--py-main-only]
+
+optional arguments:
+  -h, --help         show this help message and exit
+  -u , --user        Kattis username or email.
+  -p , --password    Kattis password.
+  -d , --directory   Directory to which Kattis solution are downloaded to.
+  --no-git           If this argument is given, Git add and commit will not be used on any files.
+  --no-readme        If this argument is given, KTG will not modify the repository's README.md in any way.
+  --py-main-only     If this argument is given, KTG only downloads Python 3 files that include the substring "def main()".
+```
 
 ## Running tests
 You can run the unittests with:
