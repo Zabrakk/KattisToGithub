@@ -10,7 +10,7 @@ Here are the basic steps KTG takes to make showing off your solutions and progra
 
 All you have to do is run KTG and use the command _git push_ once KTG has finished!
 
-You can find my Kattis solutions repository, maintained by KattisToGithub, [here](https://github.com/Zabrakk/Kattis-Solutions).
+You can find my Kattis solutions repository, maintained with KattisToGithub, [here](https://github.com/Zabrakk/Kattis-Solutions).
 
 ## Getting Started
 
