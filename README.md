@@ -16,7 +16,7 @@ You can find my Kattis solutions repository, maintained by KattisToGithub, [here
 
 ### Installation
 In order to install KTG, follow these steps:
-1. Clone this repositry:
+1. Clone this repository:
 ```bash
 git clone https://github.com/Zabrakk/KattisToGithub.git
 ```
@@ -27,9 +27,9 @@ pip install -r requirements.txt
 ```
 
 ### Running KattisToGithub for the first time
-At this point KTG can be run. However, **if you don't yet have a repositoy ready, into which the KTG wll download your solutions, go ahead and create one**.
+At this point KTG can be run. However, note that you need a repository into which the KTG wll download your solutions. **If you don't yet have a repository ready, go ahead and create one**.
 
-Now, for the sake of givin an example, let's assume that you have a repository named **KattisSolutions**, and this repository is stored locally on your machine in the same parent directory as KTG like this:
+Now, for the sake of giving an example, let's assume that you have a repository named **KattisSolutions**, and this repository is stored locally on your machine in the same parent directory as KTG like this:
 ```
 home
 |-KattisToGithub
@@ -41,19 +41,25 @@ python KattisToGithub.py -u <username> -p <password> -d ../KattisSolutions
 ```
 Substitute \<username\> and \<password\> with the details you use with Kattis' "[Log in with e-mail](https://open.kattis.com/login/email?)".
 
-Depending on how many problems you have solved KTG may take a long or a short time to run. However, once finished remember to _git push_ any commits KTG made. And thats it!
+Depending on how many problems you have solved KTG may take a while to run. However, after it has finished remember to _git push_ any commits KTG made. And thats it!
 
-If you want some more details, keep reading.
+## Updating already downloaded solutions
+In the case that you end up updating your solution to any problem that has already been downloaded by KTG, you can make KTG redownload and commit this new solution. KTG creates a file called **_status.csv_** where it stores information about solved problems. From there you can find the problem you have updated and change the value of its "Status" column to 0. An example of this can be seen in the image below.
 
-## How KattisToGithub works
-**TODO**
-update status.csv
+![Status change](img/status_example.png)
 
-kuvaesimerkki ajosta
+Now, when KTG is run again, the newest submission for that problem will be fetched.
+
+The possible status codes for **_status.csv_** are as follows:
+```python
+CODE_FOUND = 1
+UPDATE = 0
+CODE_NOT_FOUND = -1
+```
 
 ## Command line arguments
 KattisToGithub has the following command line arguments:
-```bash
+```
 usage: KattisToGithub.py [-h] -u  -p  -d  [--no-git] [--no-readme] [--py-main-only]
 
 optional arguments:
@@ -65,14 +71,16 @@ optional arguments:
   --no-readme        If this argument is given, KTG will not modify the repository's README.md in any way.
   --py-main-only     If this argument is given, KTG only downloads Python 3 files that include the substring "def main()".
 ```
+The last argument (_--py-main-only_) is something I added because I don't want to share the very short and messy solutions I have written for some problems :)
+
 
 ## Running tests
 You can run the unittests with:
 ```bash
 ./run_utest.sh
 ```
-By default unittests marked with the _@use_test_credentials_ decorator are skipped. These tests actually log into Kattis and fetch details from there. In order to also run the skipped tests, add a file called _test_credentials.txt_ to the test folder. The contents of this file should include your Kattis username and password formatted like this:
-```text
+By default unittests marked with the _@use_test_credentials_ decorator are skipped. These tests actually log into Kattis and fetch details from there. In order to also run the skipped tests, add a file called _test_credentials.txt_ to the test folder. The contents of this file should include two lines for your Kattis username and password:
+```
 username
 password
 ```
