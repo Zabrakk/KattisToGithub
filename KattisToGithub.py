@@ -166,7 +166,7 @@ class KattisToGithub:
                 if self._should_look_for_code(solved_problem):
                     solved_problem_html = self._get_html(solved_problem.submissions_link)
                     for link, language in self._get_submission_link_and_language(solved_problem_html):
-                        if language not in solved_problem.filename_language_dict.values():
+                        if language not in solved_problem.filename_language_dict.values() or solved_problem.status == ProblemStatus.UPDATE:
                             submission_html = self._get_html(link)
                             self._parse_submission(solved_problem, submission_html, language)
                         else:
