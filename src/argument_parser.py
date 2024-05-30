@@ -10,7 +10,7 @@ def parse_arguments(args: List[str]):
     - args: sys.argv[1:]
 
     Returns:
-    - List[str]: [user, password, directory]
+    - ArgumentParser
     """
     parser = ArgumentParser()
     parser.add_argument('-u', '--user', type=str, required=True, help='Kattis username or email.')
